@@ -1,0 +1,9 @@
+{
+  "Procs": [
+    { "Path": "GenerateInt.sql", "Rowset": "DrInt" },
+    { "Path": "SumInt.sql" }
+  ],
+  "Rowsets": [
+    { "Name": "DrInt", "Fields": [ "int Value" ] }
+  ]
+}

@@ -1,74 +1,38 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.IO;
-using System.Linq;
+﻿using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace CodeGenerator
 {
-    internal class DbProcModule : ICodeGenModule
+    public class DbProcCodeGenerator
     {
-#pragma warning disable 0649
-        public class Input
+        public void Generate(DbProcDeclaration d, ICodeGenWriter writer)
         {
-            public string Name;
-            public string Proc;
-            public string Path;
-            public bool Return;
-            public string Rowset;
-            public List<DbHelper.Field> Params;
-        }
-#pragma warning restore 0649
-
-        [SuppressMessage("StyleCopPlus.StyleCopPlusRules", "SP2101:MethodMustNotContainMoreLinesThan",
-            Justification = "NotYet")]
-        public void Generate(JObject input, string inputPath, ICodeGenWriter writer)
-        {
-            var i = JsonConvert.DeserializeObject<Input>(input.ToString());
-
-            // Extract parameter information from stored-procedure definitions
-
-            if (!string.IsNullOrEmpty(i.Path))
-            {
-                var procPath = Path.Combine(Path.GetDirectoryName(inputPath), i.Path);
-                var decl = ExtractProcedureDecl(procPath, i.Proc);
-                if (decl == null)
-                    throw new Exception("Cannot find: " + procPath + " " + i.Proc);
-                if (string.IsNullOrEmpty(i.Proc))
-                    i.Proc = decl.Item1;
-                i.Params = decl.Item2;
-            }
-
             // Class
 
             var sb = new StringBuilder();
-            sb.AppendFormat("public class {0}\n", i.Name);
+            sb.AppendFormat("public class {0}\n", d.ClassName);
             sb.AppendLine("{");
 
-            var resultExists = (i.Return ||
-                                !string.IsNullOrEmpty(i.Rowset) ||
-                                i.Params.Exists(p => p.IsOutput));
+            var resultExists = (d.Return ||
+                                !string.IsNullOrEmpty(d.Rowset) ||
+                                d.Params.Exists(p => p.IsOutput));
             if (resultExists)
             {
                 sb.AppendLine("\tpublic struct Result");
                 sb.AppendLine("\t{");
-                if (string.IsNullOrEmpty(i.Rowset))
+                if (string.IsNullOrEmpty(d.Rowset))
                     sb.AppendLine("\t\tpublic int AffectedRowCount;");
                 else
-                    sb.AppendFormat("\t\tpublic {0} Rowset;\n", i.Rowset);
-                if (i.Return)
+                    sb.AppendFormat("\t\tpublic {0} Rowset;\n", d.Rowset);
+                if (d.Return)
                     sb.AppendLine("\t\tpublic int Return;");
-                foreach (var p in i.Params.Where(p => p.IsOutput))
+                foreach (var p in d.Params.Where(p => p.IsOutput))
                     sb.AppendFormat("\t\tpublic {0};\n", DbHelper.GetMemberDecl(p));
                 sb.AppendLine("\t}");
                 sb.AppendLine("");
             }
 
-            var paramStr = string.Join(", ", i.Params.Where(p => p.IsInput).Select(DbHelper.GetParamDecl));
+            var paramStr = string.Join(", ", d.Params.Where(p => p.IsInput).Select(DbHelper.GetParamDecl));
             sb.AppendFormat("\tpublic static async Task<{0}> ExecuteAsync(SqlProcBinder.IDbContext dc{1}{2})\n",
                             resultExists ? "Result" : "int",
                             paramStr.Length > 0 ? ", " : "",
@@ -78,9 +42,9 @@ namespace CodeGenerator
             sb.AppendFormat("\t\tvar ctx = dc.CreateCommand();\n");
             sb.AppendFormat("\t\tvar cmd = (SqlCommand)ctx.Command;\n");
             sb.AppendFormat("\t\tcmd.CommandType = CommandType.StoredProcedure;\n");
-            sb.AppendFormat("\t\tcmd.CommandText = \"{0}\";\n", i.Proc);
+            sb.AppendFormat("\t\tcmd.CommandText = \"{0}\";\n", d.ProcName);
             var pidx = 0;
-            foreach (var p in i.Params)
+            foreach (var p in d.Params)
             {
                 if (p.IsInput && p.IsOutput == false)
                 {
@@ -130,7 +94,7 @@ namespace CodeGenerator
                 }
                 pidx += 1;
             }
-            if (i.Return)
+            if (d.Return)
             {
                 sb.AppendLine("\t\tvar pr = new SqlParameter();");
                 sb.AppendLine("\t\tpr.Direction = ParameterDirection.ReturnValue;");
@@ -140,20 +104,20 @@ namespace CodeGenerator
             sb.AppendLine("\t\tctx.OnExecuting();");
             if (resultExists)
             {
-                if (string.IsNullOrEmpty(i.Rowset))
+                if (string.IsNullOrEmpty(d.Rowset))
                     sb.AppendLine("\t\tvar rowCount = await cmd.ExecuteNonQueryAsync();");
                 else
                     sb.AppendFormat("\t\tvar reader = await cmd.ExecuteReaderAsync();\n");
 
                 sb.AppendLine("\t\tvar r = new Result();");
 
-                if (string.IsNullOrEmpty(i.Rowset))
+                if (string.IsNullOrEmpty(d.Rowset))
                     sb.AppendLine("\t\tr.AffectedRowCount = rowCount;");
                 else
-                    sb.AppendFormat("\t\tr.Rowset = new {0}(reader);\n", i.Rowset);
+                    sb.AppendFormat("\t\tr.Rowset = new {0}(reader);\n", d.Rowset);
 
                 pidx = 0;
-                foreach (var p in i.Params)
+                foreach (var p in d.Params)
                 {
                     if (p.IsOutput)
                     {
@@ -173,7 +137,7 @@ namespace CodeGenerator
                     pidx += 1;
                 }
 
-                if (i.Return)
+                if (d.Return)
                     sb.AppendLine("\t\tr.Return = (int)pr.Value;");
             }
             else
@@ -188,42 +152,6 @@ namespace CodeGenerator
             sb.Append("}");
 
             writer.AddCode(sb.ToString());
-        }
-
-        private static Tuple<string, List<DbHelper.Field>> ExtractProcedureDecl(string path, string procName)
-        {
-            var text = File.ReadAllText(path).Replace('\n', ' ').Replace('\r', ' ');
-            var matches = Regex.Matches(text, @"CREATE PROCEDURE (\[dbo\]\.)?\[(\w+)\](.+?)AS.*?BEGIN");
-            foreach (Match match in matches)
-            {
-                if (!string.IsNullOrEmpty(procName) && procName != match.Groups[2].Value)
-                    continue;
-
-                var ps = new List<DbHelper.Field>();
-                foreach (var p in match.Groups[3].Value.Split(','))
-                {
-                    var decls = p.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries)
-                                 .Where(w => w.ToLower() != "as").ToArray();
-                    if (decls.Length == 0)
-                        continue;
-
-                    var paramName = decls[0];
-                    var paramType = decls[1];
-                    var paramOutput = (decls.Length >= 3 && decls[2].ToLower() == "output");
-
-                    var type = DbHelper.GetTypeFromSqlType(paramType);
-                    ps.Add(new DbHelper.Field
-                    {
-                        Name = paramName.Substring(1),
-                        Type = type.Item1,
-                        Len = type.Item2,
-                        Dir = paramOutput ? "out" : ""
-                    });
-                }
-                return new Tuple<string, List<DbHelper.Field>>(match.Groups[2].Value, ps);
-            }
-
-            return null;
         }
     }
 }

@@ -14,49 +14,8 @@ using System.Data.Common;
 using System.Data.SqlClient;
 using System.Threading.Tasks;
 
-namespace CodeGen
+namespace Sql
 {
-    public class DrInt : IDisposable
-    {
-        private DbDataReader _reader;
-
-        public DrInt(DbDataReader reader)
-        {
-            _reader = reader;
-        }
-
-        public class Row
-        {
-            public int Value;
-        }
-
-        public async Task<Row> NextAsync()
-        {
-            if (await _reader.ReadAsync() == false) return null;
-            var r = new Row();
-            r.Value = _reader.GetInt32(0);
-            return r;
-        }
-
-        public async Task<List<T>> FetchAllRowsAndDisposeAsync<T>(Func<Row, T> selector)
-        {
-            var rows = new List<T>();
-            while (true)
-            {
-                var row = await NextAsync();
-                if (row == null) break;
-                rows.Add(selector(row));
-            }
-            Dispose();
-            return rows;
-        }
-
-        public void Dispose()
-        {
-            _reader.Dispose();
-        }
-    }
-
     public class GenerateInt
     {
         public struct Result
@@ -108,20 +67,44 @@ namespace CodeGen
         }
     }
 
-    public class SumIntBySql
+    public class DrInt : IDisposable
     {
-        public static async Task<DrInt> ExecuteAsync(SqlProcBinder.IDbContext dc, int value1, int value2)
+        private DbDataReader _reader;
+
+        public DrInt(DbDataReader reader)
         {
-            var ctx = dc.CreateCommand();
-            var cmd = (SqlCommand)ctx.Command;
-            cmd.CommandText = "SELECT @value1 + @value2";
-            cmd.Parameters.AddWithValue("@value1", value1);
-            cmd.Parameters.AddWithValue("@value2", value2);
-            ctx.OnExecuting();
-            var reader = await cmd.ExecuteReaderAsync();
-            var r = new DrInt(reader);
-            ctx.OnExecuted();
+            _reader = reader;
+        }
+
+        public class Row
+        {
+            public int Value;
+        }
+
+        public async Task<Row> NextAsync()
+        {
+            if (await _reader.ReadAsync() == false) return null;
+            var r = new Row();
+            r.Value = _reader.GetInt32(0);
             return r;
+        }
+
+        public async Task<List<T>> FetchAllRowsAndDisposeAsync<T>(Func<Row, T> selector)
+        {
+            var rows = new List<T>();
+            while (true)
+            {
+                var row = await NextAsync();
+                if (row == null) break;
+                rows.Add(selector(row));
+            }
+            Dispose();
+            return rows;
+        }
+
+        public void Dispose()
+        {
+            _reader.Dispose();
         }
     }
 }

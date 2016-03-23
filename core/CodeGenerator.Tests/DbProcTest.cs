@@ -19,14 +19,14 @@ namespace CodeGenerator.Tests
         [Fact]
         async Task Execute_StoredProcedure_WithOutput_Succeeded()
         {
-            var ret = await CodeGen.SumInt.ExecuteAsync(_db.DbContext, 1, 2);
+            var ret = await Sql.SumInt.ExecuteAsync(_db.DbContext, 1, 2);
             Assert.Equal(3, ret.answer);
         }
 
         [Fact]
         async Task Execute_StoredProcedure_ReturnRowset_Succeeded()
         {
-            var ret = await CodeGen.GenerateInt.ExecuteAsync(_db.DbContext, 10);
+            var ret = await Sql.GenerateInt.ExecuteAsync(_db.DbContext, 10);
             var values = await ret.Rowset.FetchAllRowsAndDisposeAsync(r => r.Value);
             Assert.Equal(Enumerable.Range(1, 10), values);
         }

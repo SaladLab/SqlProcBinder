@@ -1,33 +1,18 @@
-﻿using System.Collections.Generic;
-using System.Text;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+﻿using System.Text;
 
 namespace CodeGenerator
 {
-    internal class DbRowsetModule : ICodeGenModule
+    public class DbRowsetCodeGenerator
     {
-#pragma warning disable 0649
-        public class Input
+        public void Generate(DbRowsetDeclaration d, ICodeGenWriter writer)
         {
-            public string Name;
-            public List<DbHelper.Field> Fields;
-        }
-#pragma warning restore 0649
-
-        public void Generate(JObject input, string inputPath, ICodeGenWriter writer)
-        {
-            var i = JsonConvert.DeserializeObject<Input>(input.ToString());
-
-            // Class
-
             var sb = new StringBuilder();
-            sb.AppendFormat("public class {0} : IDisposable\n", i.Name);
+            sb.AppendFormat("public class {0} : IDisposable\n", d.ClassName);
             sb.AppendLine("{");
 
             sb.AppendLine("\tprivate DbDataReader _reader;");
             sb.AppendLine("");
-            sb.AppendFormat("\tpublic {0}(DbDataReader reader)\n", i.Name);
+            sb.AppendFormat("\tpublic {0}(DbDataReader reader)\n", d.ClassName);
             sb.AppendLine("\t{");
             sb.AppendLine("\t\t_reader = reader;");
             sb.AppendLine("\t}");
@@ -35,7 +20,7 @@ namespace CodeGenerator
 
             sb.AppendLine("\tpublic class Row");
             sb.AppendLine("\t{");
-            foreach (var field in i.Fields)
+            foreach (var field in d.Fields)
             {
                 sb.AppendFormat("\t\tpublic {0};\n", DbHelper.GetMemberDecl(field));
             }
@@ -47,7 +32,7 @@ namespace CodeGenerator
             sb.AppendLine("\t\tif (await _reader.ReadAsync() == false) return null;");
             sb.AppendLine("\t\tvar r = new Row();");
             var fidx = 0;
-            foreach (var field in i.Fields)
+            foreach (var field in d.Fields)
             {
                 var bclType = DbHelper.GetBclType(field.Type);
                 if (bclType != "Boolean")

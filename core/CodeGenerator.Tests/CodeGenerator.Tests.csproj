@@ -61,11 +61,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DbSqlTest.cs" />
-    <Compile Include="Generated\CodeGen.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="DbProcTest.cs" />
     <Compile Include="Database.cs" />
+    <Compile Include="Properties\SqlProc.CodeGen.cs" />
     <Compile Include="TestDbCommandContext.cs" />
     <Compile Include="TestDbContext.cs" />
   </ItemGroup>
@@ -77,8 +76,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="Generated\CodeGen.json" />
     <None Include="packages.config" />
+    <None Include="Sql\%40SqlProc.json" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Sql\GenerateInt.sql" />
@@ -92,7 +91,7 @@
     <Error Condition="!Exists('..\..\packages\xunit.runner.visualstudio.2.1.0\build\net20\xunit.runner.visualstudio.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\xunit.runner.visualstudio.2.1.0\build\net20\xunit.runner.visualstudio.props'))" />
   </Target>
   <PropertyGroup>
-    <PreBuildEvent>"$(ProjectDir)..\CodeGenerator\bin\$(ConfigurationName)\CodeGenerator.exe" "$(ProjectDir)Generated\CodeGen.json"</PreBuildEvent>
+    <PreBuildEvent>"$(ProjectDir)..\CodeGenerator\bin\$(ConfigurationName)\CodeGenerator.exe" --input "$(ProjectDir)Sql\@SqlProc.json" --target "$(ProjectDir)Properties\SqlProc.CodeGen.cs" -n Sql</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

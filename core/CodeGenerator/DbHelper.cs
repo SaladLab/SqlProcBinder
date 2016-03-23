@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 
 namespace CodeGenerator
 {
-    internal static class DbHelper
+    public static class DbHelper
     {
         public class Field
         {
