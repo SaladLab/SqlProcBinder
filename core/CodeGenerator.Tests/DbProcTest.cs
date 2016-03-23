@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -17,14 +14,14 @@ namespace CodeGenerator.Tests
         }
 
         [Fact]
-        async Task Execute_StoredProcedure_WithOutput_Succeeded()
+        private async Task Execute_StoredProcedure_WithOutput_Succeeded()
         {
             var ret = await Sql.SumInt.ExecuteAsync(_db.DbContext, 1, 2);
             Assert.Equal(3, ret.answer);
         }
 
         [Fact]
-        async Task Execute_StoredProcedure_ReturnRowset_Succeeded()
+        private async Task Execute_StoredProcedure_ReturnRowset_Succeeded()
         {
             var ret = await Sql.GenerateInt.ExecuteAsync(_db.DbContext, 10);
             var values = await ret.Rowset.FetchAllRowsAndDisposeAsync(r => r.Value);

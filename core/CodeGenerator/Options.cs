@@ -3,7 +3,7 @@ using CommandLine;
 
 namespace CodeGenerator
 {
-    class Options
+    internal class Options
     {
         [Option('i', "input", Separator = ';', HelpText = "Input option files.")]
         public IEnumerable<string> OptionFiles { get; set; }

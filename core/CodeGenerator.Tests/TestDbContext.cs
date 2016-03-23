@@ -1,7 +1,4 @@
-﻿using System;
-using System.Data;
-using System.Data.Common;
-using System.Data.SqlClient;
+﻿using System.Data.Common;
 using SqlProcBinder;
 
 namespace CodeGenerator.Tests
@@ -21,4 +18,3 @@ namespace CodeGenerator.Tests
         }
     }
 }
- 
