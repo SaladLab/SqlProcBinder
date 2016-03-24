@@ -1,11 +1,10 @@
-﻿using CommandLine;
-using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
+using CommandLine;
+using Newtonsoft.Json;
 
 namespace CodeGenerator
 {
@@ -13,7 +12,7 @@ namespace CodeGenerator
     {
         // "-s..\..\..\CodeGenerator.Tests\Sql\GenerateInt.sql;..\..\..\CodeGenerator.Tests\Sql\SumInt.sql" --target a.cs --nullable -n Sql
         // "-i..\..\..\CodeGenerator.Tests\Sql\@SqlProc.json" --target Output.cs -n Sql -p .*:sp\1
-        static int Main(string[] args)
+        private static int Main(string[] args)
         {
             // Parse command line options
 
@@ -43,7 +42,7 @@ namespace CodeGenerator
             try
             {
                 var result = parser.ParseArguments<Options>(args)
-                    .WithParsed(r => { options = r; });
+                                   .WithParsed(r => { options = r; });
             }
             catch (Exception e)
             {
@@ -82,7 +81,7 @@ namespace CodeGenerator
             return Process(options, procs, rowsets);
         }
 
-        private static void ReadSource(string sourceFile, 
+        private static void ReadSource(string sourceFile,
                                        List<DbProcDeclaration> procs,
                                        List<DbRowsetDeclaration> rowsets)
         {
@@ -165,7 +164,8 @@ namespace CodeGenerator
             }
         }
 
-        private static void MakeClassName(Options options, IList<DbProcDeclaration> procs, IList<DbRowsetDeclaration> rowsets)
+        private static void MakeClassName(Options options, IList<DbProcDeclaration> procs,
+                                          IList<DbRowsetDeclaration> rowsets)
         {
             foreach (var proc in procs.Where(p => string.IsNullOrEmpty(p.ClassName)))
             {

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace CodeGenerator
+﻿namespace CodeGenerator
 {
     public class DbField
     {
