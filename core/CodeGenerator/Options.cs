@@ -14,7 +14,7 @@ namespace CodeGenerator
         [Option('p', "pattern", Separator = ';', HelpText = "Regular expression pattern to make class name.")]
         public IEnumerable<string> Patterns { get; set; }
 
-        [Option('t', "target", HelpText = "Filename of a generated code.")]
+        [Option('t', "target", Required = true, HelpText = "Filename of a generated code.")]
         public string TargetFile { get; set; }
 
         [Option('n', "namespace", HelpText = "Namespace that generated source has.")]
