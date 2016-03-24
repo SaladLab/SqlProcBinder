@@ -21,7 +21,11 @@ namespace CodeGenerator
                 decl.ProcName = match.Groups[2].Value;
                 decl.Params = new List<DbHelper.Field>();
 
-                foreach (var p in match.Groups[3].Value.Split(','))
+                var paramsText = match.Groups[3].Value.Trim();
+                if (paramsText.StartsWith("(") && paramsText.EndsWith(")"))
+                    paramsText = paramsText.Substring(1, paramsText.Length - 2);
+
+                foreach (var p in paramsText.Split(','))
                 {
                     var parameters = p.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries)
                                       .Where(w => w.ToLower() != "as").ToArray();
@@ -33,6 +37,9 @@ namespace CodeGenerator
                     var paramOutput = (parameters.Length >= 3 && parameters[2].ToLower() == "output");
 
                     var type = DbHelper.GetTypeFromSqlType(paramType);
+                    if (type == null)
+                        throw new Exception("Cannot resolve type: " + paramType);
+
                     decl.Params.Add(new DbHelper.Field
                     {
                         Name = paramName.Substring(1),
