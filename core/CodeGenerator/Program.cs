@@ -203,8 +203,8 @@ namespace CodeGenerator
             writer.AddUsing("System.Collections.Generic");
             writer.AddUsing("System.Data");
             writer.AddUsing("System.Data.Common");
-            writer.AddUsing("System.Data.SqlClient");
             writer.AddUsing("System.Threading.Tasks");
+            writer.AddUsing("SqlProcBinder");
 
             if (string.IsNullOrEmpty(options.Namespace) == false)
                 writer.PushNamespace(options.Namespace);

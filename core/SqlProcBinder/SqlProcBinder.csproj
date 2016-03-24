@@ -46,6 +46,7 @@
     <Compile Include="Properties\AssemblyInfoGenerated.cs" />
     <Compile Include="SimpleDbCommandContext.cs" />
     <Compile Include="SimpleDbContext.cs" />
+    <Compile Include="SqlBindHelper.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

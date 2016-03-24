@@ -11,8 +11,8 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
-using System.Data.SqlClient;
 using System.Threading.Tasks;
+using SqlProcBinder;
 
 namespace Sql
 {
@@ -42,79 +42,50 @@ namespace Sql
             public Guid o_uniqueidentifier;
         }
 
-        public static async Task<Result> ExecuteAsync(SqlProcBinder.IDbContext dc, bool i_bit, byte i_tinyint, short i_smallint, int i_int, long i_bigint, float i_real, double i_float, Decimal i_money, Decimal i_decimal, DateTime i_smalldatetime, DateTime i_date, DateTime i_datetime, DateTimeOffset i_datetimeoffset, TimeSpan i_time, string i_nchar, string i_nvarchar, byte[] i_binary, byte[] i_varbinary, Guid i_uniqueidentifier)
+        public static async Task<Result> ExecuteAsync(IDbContext dc, bool i_bit, byte i_tinyint, short i_smallint, int i_int, long i_bigint, float i_real, double i_float, Decimal i_money, Decimal i_decimal, DateTime i_smalldatetime, DateTime i_date, DateTime i_datetime, DateTimeOffset i_datetimeoffset, TimeSpan i_time, string i_nchar, string i_nvarchar, byte[] i_binary, byte[] i_varbinary, Guid i_uniqueidentifier)
         {
             var ctx = dc.CreateCommand();
-            var cmd = (SqlCommand)ctx.Command;
+            var cmd = ctx.Command;
             cmd.CommandType = CommandType.StoredProcedure;
             cmd.CommandText = "EchoParameters";
-            cmd.Parameters.AddWithValue("@i_bit", i_bit);
-            cmd.Parameters.AddWithValue("@i_tinyint", i_tinyint);
-            cmd.Parameters.AddWithValue("@i_smallint", i_smallint);
-            cmd.Parameters.AddWithValue("@i_int", i_int);
-            cmd.Parameters.AddWithValue("@i_bigint", i_bigint);
-            cmd.Parameters.AddWithValue("@i_real", i_real);
-            cmd.Parameters.AddWithValue("@i_float", i_float);
-            cmd.Parameters.AddWithValue("@i_money", i_money);
-            cmd.Parameters.AddWithValue("@i_decimal", i_decimal);
-            cmd.Parameters.AddWithValue("@i_smalldatetime", i_smalldatetime);
-            cmd.Parameters.AddWithValue("@i_date", i_date);
-            cmd.Parameters.AddWithValue("@i_datetime", i_datetime);
-            cmd.Parameters.AddWithValue("@i_datetimeoffset", i_datetimeoffset);
-            cmd.Parameters.AddWithValue("@i_time", i_time);
-            if (i_nchar != null)
-                cmd.Parameters.AddWithValue("@i_nchar", i_nchar);
-            else
-                cmd.Parameters.AddWithValue("@i_nchar", DBNull.Value);
-            if (i_nvarchar != null)
-                cmd.Parameters.AddWithValue("@i_nvarchar", i_nvarchar);
-            else
-                cmd.Parameters.AddWithValue("@i_nvarchar", DBNull.Value);
-            cmd.Parameters.AddWithValue("@i_binary", i_binary);
-            cmd.Parameters.AddWithValue("@i_varbinary", i_varbinary);
-            cmd.Parameters.AddWithValue("@i_uniqueidentifier", i_uniqueidentifier);
-            var p19 = cmd.Parameters.AddWithValue("@o_bit", false);
-            p19.Direction = ParameterDirection.Output;
-            var p20 = cmd.Parameters.AddWithValue("@o_tinyint", (byte)0);
-            p20.Direction = ParameterDirection.Output;
-            var p21 = cmd.Parameters.AddWithValue("@o_smallint", (short)0);
-            p21.Direction = ParameterDirection.Output;
-            var p22 = cmd.Parameters.AddWithValue("@o_int", 0);
-            p22.Direction = ParameterDirection.Output;
-            var p23 = cmd.Parameters.AddWithValue("@o_bigint", 0L);
-            p23.Direction = ParameterDirection.Output;
-            var p24 = cmd.Parameters.AddWithValue("@o_real", 0f);
-            p24.Direction = ParameterDirection.Output;
-            var p25 = cmd.Parameters.AddWithValue("@o_float", 0.0);
-            p25.Direction = ParameterDirection.Output;
-            var p26 = cmd.Parameters.AddWithValue("@o_money", 0M);
-            p26.Direction = ParameterDirection.Output;
-            var p27 = cmd.Parameters.AddWithValue("@o_decimal", 0M);
-            p27.Direction = ParameterDirection.Output;
-            var p28 = cmd.Parameters.AddWithValue("@o_smalldatetime", DateTime.MinValue);
-            p28.Direction = ParameterDirection.Output;
-            var p29 = cmd.Parameters.AddWithValue("@o_date", DateTime.MinValue);
-            p29.Direction = ParameterDirection.Output;
-            var p30 = cmd.Parameters.AddWithValue("@o_datetime", DateTime.MinValue);
-            p30.Direction = ParameterDirection.Output;
-            var p31 = cmd.Parameters.AddWithValue("@o_datetimeoffset", DateTimeOffset.MinValue);
-            p31.Direction = ParameterDirection.Output;
-            var p32 = cmd.Parameters.AddWithValue("@o_time", TimeSpan.Zero);
-            p32.Direction = ParameterDirection.Output;
-            var p33 = cmd.Parameters.AddWithValue("@o_nchar", string.Empty);
-            p33.Direction = ParameterDirection.Output;
-            p33.Size = 4;
-            var p34 = cmd.Parameters.AddWithValue("@o_nvarchar", string.Empty);
-            p34.Direction = ParameterDirection.Output;
-            p34.Size = 4;
-            var p35 = cmd.Parameters.AddWithValue("@o_binary", new byte[0]);
-            p35.Direction = ParameterDirection.Output;
-            p35.Size = 4;
-            var p36 = cmd.Parameters.AddWithValue("@o_varbinary", new byte[0]);
-            p36.Direction = ParameterDirection.Output;
-            p36.Size = 4;
-            var p37 = cmd.Parameters.AddWithValue("@o_uniqueidentifier", Guid.Empty);
-            p37.Direction = ParameterDirection.Output;
+            cmd.AddParameter("@i_bit", i_bit);
+            cmd.AddParameter("@i_tinyint", i_tinyint);
+            cmd.AddParameter("@i_smallint", i_smallint);
+            cmd.AddParameter("@i_int", i_int);
+            cmd.AddParameter("@i_bigint", i_bigint);
+            cmd.AddParameter("@i_real", i_real);
+            cmd.AddParameter("@i_float", i_float);
+            cmd.AddParameter("@i_money", i_money);
+            cmd.AddParameter("@i_decimal", i_decimal);
+            cmd.AddParameter("@i_smalldatetime", i_smalldatetime);
+            cmd.AddParameter("@i_date", i_date);
+            cmd.AddParameter("@i_datetime", i_datetime);
+            cmd.AddParameter("@i_datetimeoffset", i_datetimeoffset);
+            cmd.AddParameter("@i_time", i_time);
+            cmd.AddParameter("@i_nchar", i_nchar);
+            cmd.AddParameter("@i_nvarchar", i_nvarchar);
+            cmd.AddParameter("@i_binary", i_binary);
+            cmd.AddParameter("@i_varbinary", i_varbinary);
+            cmd.AddParameter("@i_uniqueidentifier", i_uniqueidentifier);
+            var p19 = cmd.AddParameter("@o_bit", false, ParameterDirection.Output);
+            var p20 = cmd.AddParameter("@o_tinyint", (byte)0, ParameterDirection.Output);
+            var p21 = cmd.AddParameter("@o_smallint", (short)0, ParameterDirection.Output);
+            var p22 = cmd.AddParameter("@o_int", 0, ParameterDirection.Output);
+            var p23 = cmd.AddParameter("@o_bigint", 0L, ParameterDirection.Output);
+            var p24 = cmd.AddParameter("@o_real", 0f, ParameterDirection.Output);
+            var p25 = cmd.AddParameter("@o_float", 0.0, ParameterDirection.Output);
+            var p26 = cmd.AddParameter("@o_money", 0M, ParameterDirection.Output);
+            var p27 = cmd.AddParameter("@o_decimal", 0M, ParameterDirection.Output);
+            var p28 = cmd.AddParameter("@o_smalldatetime", DateTime.MinValue, ParameterDirection.Output);
+            var p29 = cmd.AddParameter("@o_date", DateTime.MinValue, ParameterDirection.Output);
+            var p30 = cmd.AddParameter("@o_datetime", DateTime.MinValue, ParameterDirection.Output);
+            var p31 = cmd.AddParameter("@o_datetimeoffset", DateTimeOffset.MinValue, ParameterDirection.Output);
+            var p32 = cmd.AddParameter("@o_time", TimeSpan.Zero, ParameterDirection.Output);
+            var p33 = cmd.AddParameter("@o_nchar", string.Empty, ParameterDirection.Output, 4);
+            var p34 = cmd.AddParameter("@o_nvarchar", string.Empty, ParameterDirection.Output, 4);
+            var p35 = cmd.AddParameter("@o_binary", new byte[0], ParameterDirection.Output, 4);
+            var p36 = cmd.AddParameter("@o_varbinary", new byte[0], ParameterDirection.Output, 4);
+            var p37 = cmd.AddParameter("@o_uniqueidentifier", Guid.Empty, ParameterDirection.Output);
             ctx.OnExecuting();
             var rowCount = await cmd.ExecuteNonQueryAsync();
             var r = new Result();
@@ -150,37 +121,31 @@ namespace Sql
             public DrEcho Rowset;
         }
 
-        public static async Task<Result> ExecuteAsync(SqlProcBinder.IDbContext dc, bool i_bit, byte i_tinyint, short i_smallint, int i_int, long i_bigint, float i_real, double i_float, Decimal i_money, Decimal i_decimal, DateTime i_smalldatetime, DateTime i_date, DateTime i_datetime, DateTimeOffset i_datetimeoffset, TimeSpan i_time, string i_nchar, string i_nvarchar, byte[] i_binary, byte[] i_varbinary, Guid i_uniqueidentifier)
+        public static async Task<Result> ExecuteAsync(IDbContext dc, bool i_bit, byte i_tinyint, short i_smallint, int i_int, long i_bigint, float i_real, double i_float, Decimal i_money, Decimal i_decimal, DateTime i_smalldatetime, DateTime i_date, DateTime i_datetime, DateTimeOffset i_datetimeoffset, TimeSpan i_time, string i_nchar, string i_nvarchar, byte[] i_binary, byte[] i_varbinary, Guid i_uniqueidentifier)
         {
             var ctx = dc.CreateCommand();
-            var cmd = (SqlCommand)ctx.Command;
+            var cmd = ctx.Command;
             cmd.CommandType = CommandType.StoredProcedure;
             cmd.CommandText = "EchoParametersAsRowset";
-            cmd.Parameters.AddWithValue("@i_bit", i_bit);
-            cmd.Parameters.AddWithValue("@i_tinyint", i_tinyint);
-            cmd.Parameters.AddWithValue("@i_smallint", i_smallint);
-            cmd.Parameters.AddWithValue("@i_int", i_int);
-            cmd.Parameters.AddWithValue("@i_bigint", i_bigint);
-            cmd.Parameters.AddWithValue("@i_real", i_real);
-            cmd.Parameters.AddWithValue("@i_float", i_float);
-            cmd.Parameters.AddWithValue("@i_money", i_money);
-            cmd.Parameters.AddWithValue("@i_decimal", i_decimal);
-            cmd.Parameters.AddWithValue("@i_smalldatetime", i_smalldatetime);
-            cmd.Parameters.AddWithValue("@i_date", i_date);
-            cmd.Parameters.AddWithValue("@i_datetime", i_datetime);
-            cmd.Parameters.AddWithValue("@i_datetimeoffset", i_datetimeoffset);
-            cmd.Parameters.AddWithValue("@i_time", i_time);
-            if (i_nchar != null)
-                cmd.Parameters.AddWithValue("@i_nchar", i_nchar);
-            else
-                cmd.Parameters.AddWithValue("@i_nchar", DBNull.Value);
-            if (i_nvarchar != null)
-                cmd.Parameters.AddWithValue("@i_nvarchar", i_nvarchar);
-            else
-                cmd.Parameters.AddWithValue("@i_nvarchar", DBNull.Value);
-            cmd.Parameters.AddWithValue("@i_binary", i_binary);
-            cmd.Parameters.AddWithValue("@i_varbinary", i_varbinary);
-            cmd.Parameters.AddWithValue("@i_uniqueidentifier", i_uniqueidentifier);
+            cmd.AddParameter("@i_bit", i_bit);
+            cmd.AddParameter("@i_tinyint", i_tinyint);
+            cmd.AddParameter("@i_smallint", i_smallint);
+            cmd.AddParameter("@i_int", i_int);
+            cmd.AddParameter("@i_bigint", i_bigint);
+            cmd.AddParameter("@i_real", i_real);
+            cmd.AddParameter("@i_float", i_float);
+            cmd.AddParameter("@i_money", i_money);
+            cmd.AddParameter("@i_decimal", i_decimal);
+            cmd.AddParameter("@i_smalldatetime", i_smalldatetime);
+            cmd.AddParameter("@i_date", i_date);
+            cmd.AddParameter("@i_datetime", i_datetime);
+            cmd.AddParameter("@i_datetimeoffset", i_datetimeoffset);
+            cmd.AddParameter("@i_time", i_time);
+            cmd.AddParameter("@i_nchar", i_nchar);
+            cmd.AddParameter("@i_nvarchar", i_nvarchar);
+            cmd.AddParameter("@i_binary", i_binary);
+            cmd.AddParameter("@i_varbinary", i_varbinary);
+            cmd.AddParameter("@i_uniqueidentifier", i_uniqueidentifier);
             ctx.OnExecuting();
             var reader = await cmd.ExecuteReaderAsync();
             var r = new Result();
@@ -197,13 +162,13 @@ namespace Sql
             public DrInt Rowset;
         }
 
-        public static async Task<Result> ExecuteAsync(SqlProcBinder.IDbContext dc, int count)
+        public static async Task<Result> ExecuteAsync(IDbContext dc, int count)
         {
             var ctx = dc.CreateCommand();
-            var cmd = (SqlCommand)ctx.Command;
+            var cmd = ctx.Command;
             cmd.CommandType = CommandType.StoredProcedure;
             cmd.CommandText = "GenerateInt";
-            cmd.Parameters.AddWithValue("@count", count);
+            cmd.AddParameter("@count", count);
             ctx.OnExecuting();
             var reader = await cmd.ExecuteReaderAsync();
             var r = new Result();
@@ -220,13 +185,13 @@ namespace Sql
             public DbDataReader Rowset;
         }
 
-        public static async Task<Result> ExecuteAsync(SqlProcBinder.IDbContext dc, int count)
+        public static async Task<Result> ExecuteAsync(IDbContext dc, int count)
         {
             var ctx = dc.CreateCommand();
-            var cmd = (SqlCommand)ctx.Command;
+            var cmd = ctx.Command;
             cmd.CommandType = CommandType.StoredProcedure;
             cmd.CommandText = "GenerateInt";
-            cmd.Parameters.AddWithValue("@count", count);
+            cmd.AddParameter("@count", count);
             ctx.OnExecuting();
             var reader = await cmd.ExecuteReaderAsync();
             var r = new Result();
@@ -244,16 +209,14 @@ namespace Sql
             public string message;
         }
 
-        public static async Task<Result> ExecuteAsync(SqlProcBinder.IDbContext dc, int count)
+        public static async Task<Result> ExecuteAsync(IDbContext dc, int count)
         {
             var ctx = dc.CreateCommand();
-            var cmd = (SqlCommand)ctx.Command;
+            var cmd = ctx.Command;
             cmd.CommandType = CommandType.StoredProcedure;
             cmd.CommandText = "GenerateIntWithOutput";
-            cmd.Parameters.AddWithValue("@count", count);
-            var p1 = cmd.Parameters.AddWithValue("@message", string.Empty);
-            p1.Direction = ParameterDirection.Output;
-            p1.Size = 100;
+            cmd.AddParameter("@count", count);
+            var p1 = cmd.AddParameter("@message", string.Empty, ParameterDirection.Output, 100);
             ctx.OnExecuting();
             var reader = await cmd.ExecuteReaderAsync();
             var r = new Result();
@@ -266,16 +229,13 @@ namespace Sql
 
     public class RaiseError
     {
-        public static async Task<int> ExecuteAsync(SqlProcBinder.IDbContext dc, string message)
+        public static async Task<int> ExecuteAsync(IDbContext dc, string message)
         {
             var ctx = dc.CreateCommand();
-            var cmd = (SqlCommand)ctx.Command;
+            var cmd = ctx.Command;
             cmd.CommandType = CommandType.StoredProcedure;
             cmd.CommandText = "RaiseError";
-            if (message != null)
-                cmd.Parameters.AddWithValue("@message", message);
-            else
-                cmd.Parameters.AddWithValue("@message", DBNull.Value);
+            cmd.AddParameter("@message", message);
             ctx.OnExecuting();
             var r = await cmd.ExecuteNonQueryAsync();
             ctx.OnExecuted();
@@ -291,16 +251,15 @@ namespace Sql
             public int answer;
         }
 
-        public static async Task<Result> ExecuteAsync(SqlProcBinder.IDbContext dc, int value1, int value2)
+        public static async Task<Result> ExecuteAsync(IDbContext dc, int value1, int value2)
         {
             var ctx = dc.CreateCommand();
-            var cmd = (SqlCommand)ctx.Command;
+            var cmd = ctx.Command;
             cmd.CommandType = CommandType.StoredProcedure;
             cmd.CommandText = "SumInt";
-            cmd.Parameters.AddWithValue("@value1", value1);
-            cmd.Parameters.AddWithValue("@value2", value2);
-            var p2 = cmd.Parameters.AddWithValue("@answer", 0);
-            p2.Direction = ParameterDirection.Output;
+            cmd.AddParameter("@value1", value1);
+            cmd.AddParameter("@value2", value2);
+            var p2 = cmd.AddParameter("@answer", 0, ParameterDirection.Output);
             ctx.OnExecuting();
             var rowCount = await cmd.ExecuteNonQueryAsync();
             var r = new Result();
@@ -320,19 +279,16 @@ namespace Sql
             public int answer;
         }
 
-        public static async Task<Result> ExecuteAsync(SqlProcBinder.IDbContext dc, int value1, int value2)
+        public static async Task<Result> ExecuteAsync(IDbContext dc, int value1, int value2)
         {
             var ctx = dc.CreateCommand();
-            var cmd = (SqlCommand)ctx.Command;
+            var cmd = ctx.Command;
             cmd.CommandType = CommandType.StoredProcedure;
             cmd.CommandText = "SumIntWithReturn";
-            cmd.Parameters.AddWithValue("@value1", value1);
-            cmd.Parameters.AddWithValue("@value2", value2);
-            var p2 = cmd.Parameters.AddWithValue("@answer", 0);
-            p2.Direction = ParameterDirection.Output;
-            var pr = new SqlParameter();
-            pr.Direction = ParameterDirection.ReturnValue;
-            cmd.Parameters.Add(pr);
+            cmd.AddParameter("@value1", value1);
+            cmd.AddParameter("@value2", value2);
+            var p2 = cmd.AddParameter("@answer", 0, ParameterDirection.Output);
+            var pr = cmd.AddParameter(null, null, ParameterDirection.ReturnValue);
             ctx.OnExecuting();
             var rowCount = await cmd.ExecuteNonQueryAsync();
             var r = new Result();

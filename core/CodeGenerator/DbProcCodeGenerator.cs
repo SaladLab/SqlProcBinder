@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace CodeGenerator
@@ -36,14 +37,14 @@ namespace CodeGenerator
             }
 
             var paramStr = string.Join(", ", d.Params.Where(p => p.IsInput).Select(DbTypeHelper.GetParamDecl));
-            sb.AppendFormat("\tpublic static async Task<{0}> ExecuteAsync(SqlProcBinder.IDbContext dc{1}{2})\n",
+            sb.AppendFormat("\tpublic static async Task<{0}> ExecuteAsync(IDbContext dc{1}{2})\n",
                             resultExists ? "Result" : "int",
                             paramStr.Length > 0 ? ", " : "",
                             paramStr);
             sb.AppendLine("\t{");
 
             sb.AppendFormat("\t\tvar ctx = dc.CreateCommand();\n");
-            sb.AppendFormat("\t\tvar cmd = (SqlCommand)ctx.Command;\n");
+            sb.AppendFormat("\t\tvar cmd = ctx.Command;\n");
             sb.AppendFormat("\t\tcmd.CommandType = CommandType.StoredProcedure;\n");
             sb.AppendFormat("\t\tcmd.CommandText = \"{0}\";\n", d.ProcName);
             var pidx = 0;
@@ -54,54 +55,33 @@ namespace CodeGenerator
                     if (p.Type == "DataTable")
                     {
                         sb.AppendFormat(
-                            "\t\tcmd.Parameters.AddWithValue(\"@{0}\", {1}).SqlDbType = SqlDbType.Structured;\n",
+                            "\t\tcmd.AddParameter(\"@{0}\", {1}).SqlDbType = SqlDbType.Structured;\n",
                             p.Name, p.Name);
                     }
                     else
                     {
-                        if (p.Type == "string")
-                        {
-                            sb.AppendFormat(
-                                "\t\tif ({0} != null)\n" +
-                                "\t\t\tcmd.Parameters.AddWithValue(\"@{0}\", {1});\n" +
-                                "\t\telse\n" +
-                                "\t\t\tcmd.Parameters.AddWithValue(\"@{0}\", DBNull.Value);\n",
-                                p.Name, p.Name);
-                        }
-                        else
-                        {
-                            sb.AppendFormat(
-                                "\t\tcmd.Parameters.AddWithValue(\"@{0}\", {1});\n",
-                                p.Name, p.Name);
-                        }
+                        sb.AppendFormat(
+                            "\t\tcmd.AddParameter(\"@{0}\", {1});\n",
+                            p.Name, p.Name);
                     }
                 }
                 else if (p.IsInput && p.IsOutput)
                 {
-                    sb.AppendFormat("\t\tcmd.Parameters.AddWithValue(\"@{0}\", {1});\n", p.Name, p.Name);
-                    sb.AppendFormat("\t\tp{0}.Direction = ParameterDirection.InputOutput;\n", pidx);
-                    if (p.Len > 0)
-                        sb.AppendFormat("\t\tp{0}.Size = {1};\n", pidx, p.Len);
+                    sb.AppendFormat(
+                        "\t\tvar p{0} = cmd.AddParameter(\"@{1}\", {1}, ParameterDirection.InputOutput{2});\n",
+                        pidx, p.Name, p.Len > 0 ? ", " + p.Len : "");
                 }
                 else
                 {
                     sb.AppendFormat(
-                        "\t\tvar p{0} = cmd.Parameters.AddWithValue(\"@{1}\", {2});\n",
-                        pidx, p.Name, DbTypeHelper.GetInitValue(p.Type));
-                    sb.AppendFormat(
-                        "\t\tp{0}.Direction = ParameterDirection.Output;\n",
-                        pidx);
-
-                    if (p.Len != 0)
-                        sb.AppendFormat("\t\tp{0}.Size = {1};\n", pidx, p.Len);
+                        "\t\tvar p{0} = cmd.AddParameter(\"@{1}\", {2}, ParameterDirection.Output{3});\n",
+                        pidx, p.Name, DbTypeHelper.GetInitValue(p.Type), p.Len > 0 ? ", " + p.Len : "");
                 }
                 pidx += 1;
             }
             if (d.Return)
             {
-                sb.AppendLine("\t\tvar pr = new SqlParameter();");
-                sb.AppendLine("\t\tpr.Direction = ParameterDirection.ReturnValue;");
-                sb.AppendLine("\t\tcmd.Parameters.Add(pr);");
+                sb.AppendLine("\t\tvar pr = cmd.AddParameter(null, null, ParameterDirection.ReturnValue);");
             }
 
             sb.AppendLine("\t\tctx.OnExecuting();");
