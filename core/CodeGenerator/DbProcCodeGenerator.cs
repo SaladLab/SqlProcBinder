@@ -108,18 +108,9 @@ namespace CodeGenerator
                 {
                     if (p.IsOutput)
                     {
-                        if (DbTypeHelper.IsValueType(p.Type))
-                        {
-                            sb.AppendFormat(
-                                "\t\tr.{0} = (p{2}.Value is DBNull) ? {3} : ({1})p{2}.Value;\n",
-                                p.Name, p.Type, pidx, DbTypeHelper.GetInitValue(p.Type));
-                        }
-                        else
-                        {
-                            sb.AppendFormat(
-                                "\t\tr.{0} = (p{2}.Value is DBNull) ? null : ({1})p{2}.Value;\n",
-                                p.Name, p.Type, pidx);
-                        }
+                        sb.AppendFormat(
+                            "\t\tr.{0} = (p{2}.Value is DBNull) ? {3} : ({1})p{2}.Value;\n",
+                            p.Name, p.Type, pidx, DbTypeHelper.GetInitValue(p.Type));
                     }
                     pidx += 1;
                 }

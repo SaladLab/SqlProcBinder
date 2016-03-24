@@ -5,6 +5,10 @@
     { "Path": "GenerateInt.sql", "Rowset": "DrInt" },
     { "Path": "GenerateInt.sql", "ClassName": "GenerateIntByRowset", "Rowset": "DbDataReader" },
     { "Path": "GenerateIntWithOutput.sql", "Rowset": "DrInt", "RowsetFetch": true },
+    { "Path": "GenerateNullableInt.sql", "Rowset": "DrNullableInt" },
+    { "Path": "GenerateNullableInt.sql", "ClassName": "GenerateCoalescedInt", "Rowset": "DrInt" },
+    { "Path": "GenerateNullableString.sql", "Rowset": "DrNullableString" },
+    { "Path": "GenerateNullableString.sql", "ClassName": "GenerateCoalescedString", "Rowset": "DrString" },
     { "Path": "RaiseError.sql" },
     { "Path": "SumInt.sql" },
     { "Path": "SumIntWithReturn.sql", "Return": true }
@@ -38,6 +42,24 @@
       "Name": "DrInt",
       "Fields": [
         "int Value"
+      ]
+    },
+    {
+      "Name": "DrString",
+      "Fields": [
+        "string Value"
+      ]
+    },
+    {
+      "Name": "DrNullableInt",
+      "Fields": [
+        "int? Value"
+      ]
+    },
+    {
+      "Name": "DrNullableString",
+      "Fields": [
+        "string? Value"
       ]
     }
   ]

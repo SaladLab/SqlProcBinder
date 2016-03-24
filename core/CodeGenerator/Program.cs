@@ -153,11 +153,23 @@ namespace CodeGenerator
                     rowset.Fields = jrowset.Fields.Select(s =>
                     {
                         var strs = s.Split();
-                        return new DbField
+                        if (strs[0].EndsWith("?"))
                         {
-                            Type = strs[0],
-                            Name = strs[1]
-                        };
+                            return new DbField
+                            {
+                                Type = strs[0].Substring(0, strs[0].Length - 1),
+                                Name = strs[1],
+                                Nullable = true
+                            };
+                        }
+                        else
+                        {
+                            return new DbField
+                            {
+                                Type = strs[0],
+                                Name = strs[1]
+                            };
+                        }
                     }).ToList();
                     rowsets.Add(rowset);
                 }

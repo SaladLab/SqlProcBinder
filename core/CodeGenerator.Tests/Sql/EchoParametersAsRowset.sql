@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[EchoParametersAsRowset]
     @i_bit as bit,
-    @i_tinyint as tinyint, 
+    @i_tinyint as tinyint,
     @i_smallint as smallint,
     @i_int as int,
     @i_bigint as bigint,

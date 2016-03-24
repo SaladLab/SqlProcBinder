@@ -34,8 +34,18 @@ namespace CodeGenerator
             var fidx = 0;
             foreach (var field in d.Fields)
             {
-                sb.AppendFormat("\t\tr.{0} = ({1})_reader.GetValue({2});\n",
-                                field.Name, field.Type, fidx);
+                sb.AppendLine($"\t\tvar v{fidx} = _reader.GetValue({fidx});");
+                if (field.Nullable)
+                {
+                    var typeSuffix = DbTypeHelper.IsValueType(field.Type) ? "?" : "";
+                    sb.AppendFormat("\t\tr.{0} = (v{3} is DBNull) ? ({1}{2})null : ({1})v{3};\n",
+                                    field.Name, field.Type, typeSuffix, fidx);
+                }
+                else
+                {
+                    sb.AppendFormat("\t\tr.{0} = (v{3} is DBNull) ? {2} : ({1})v{3};\n",
+                                    field.Name, field.Type, DbTypeHelper.GetInitValue(field.Type), fidx);
+                }
                 fidx += 1;
             }
             sb.AppendLine("\t\treturn r;");

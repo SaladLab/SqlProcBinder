@@ -104,10 +104,10 @@ namespace Sql
             r.o_datetime = (p30.Value is DBNull) ? DateTime.MinValue : (DateTime)p30.Value;
             r.o_datetimeoffset = (p31.Value is DBNull) ? DateTimeOffset.MinValue : (DateTimeOffset)p31.Value;
             r.o_time = (p32.Value is DBNull) ? TimeSpan.Zero : (TimeSpan)p32.Value;
-            r.o_nchar = (p33.Value is DBNull) ? null : (string)p33.Value;
-            r.o_nvarchar = (p34.Value is DBNull) ? null : (string)p34.Value;
-            r.o_binary = (p35.Value is DBNull) ? null : (byte[])p35.Value;
-            r.o_varbinary = (p36.Value is DBNull) ? null : (byte[])p36.Value;
+            r.o_nchar = (p33.Value is DBNull) ? string.Empty : (string)p33.Value;
+            r.o_nvarchar = (p34.Value is DBNull) ? string.Empty : (string)p34.Value;
+            r.o_binary = (p35.Value is DBNull) ? new byte[0] : (byte[])p35.Value;
+            r.o_varbinary = (p36.Value is DBNull) ? new byte[0] : (byte[])p36.Value;
             r.o_uniqueidentifier = (p37.Value is DBNull) ? Guid.Empty : (Guid)p37.Value;
             ctx.OnExecuted();
             return r;
@@ -221,7 +221,99 @@ namespace Sql
             var reader = await cmd.ExecuteReaderAsync();
             var r = new Result();
             r.Rows = await (new DrInt(reader)).FetchAllRowsAndDisposeAsync();
-            r.message = (p1.Value is DBNull) ? null : (string)p1.Value;
+            r.message = (p1.Value is DBNull) ? string.Empty : (string)p1.Value;
+            ctx.OnExecuted();
+            return r;
+        }
+    }
+
+    public class GenerateNullableInt
+    {
+        public struct Result
+        {
+            public DrNullableInt Rowset;
+        }
+
+        public static async Task<Result> ExecuteAsync(IDbContext dc, int count)
+        {
+            var ctx = dc.CreateCommand();
+            var cmd = ctx.Command;
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.CommandText = "GenerateNullableInt";
+            cmd.AddParameter("@count", count);
+            ctx.OnExecuting();
+            var reader = await cmd.ExecuteReaderAsync();
+            var r = new Result();
+            r.Rowset = new DrNullableInt(reader);
+            ctx.OnExecuted();
+            return r;
+        }
+    }
+
+    public class GenerateCoalescedInt
+    {
+        public struct Result
+        {
+            public DrInt Rowset;
+        }
+
+        public static async Task<Result> ExecuteAsync(IDbContext dc, int count)
+        {
+            var ctx = dc.CreateCommand();
+            var cmd = ctx.Command;
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.CommandText = "GenerateNullableInt";
+            cmd.AddParameter("@count", count);
+            ctx.OnExecuting();
+            var reader = await cmd.ExecuteReaderAsync();
+            var r = new Result();
+            r.Rowset = new DrInt(reader);
+            ctx.OnExecuted();
+            return r;
+        }
+    }
+
+    public class GenerateNullableString
+    {
+        public struct Result
+        {
+            public DrNullableString Rowset;
+        }
+
+        public static async Task<Result> ExecuteAsync(IDbContext dc, int count)
+        {
+            var ctx = dc.CreateCommand();
+            var cmd = ctx.Command;
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.CommandText = "GenerateNullableString";
+            cmd.AddParameter("@count", count);
+            ctx.OnExecuting();
+            var reader = await cmd.ExecuteReaderAsync();
+            var r = new Result();
+            r.Rowset = new DrNullableString(reader);
+            ctx.OnExecuted();
+            return r;
+        }
+    }
+
+    public class GenerateCoalescedString
+    {
+        public struct Result
+        {
+            public DrString Rowset;
+        }
+
+        public static async Task<Result> ExecuteAsync(IDbContext dc, int count)
+        {
+            var ctx = dc.CreateCommand();
+            var cmd = ctx.Command;
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.CommandText = "GenerateNullableString";
+            cmd.AddParameter("@count", count);
+            ctx.OnExecuting();
+            var reader = await cmd.ExecuteReaderAsync();
+            var r = new Result();
+            r.Rowset = new DrString(reader);
             ctx.OnExecuted();
             return r;
         }
@@ -336,25 +428,44 @@ namespace Sql
         {
             if (await _reader.ReadAsync() == false) return null;
             var r = new Row();
-            r.o_bit = (bool)_reader.GetValue(0);
-            r.o_tinyint = (byte)_reader.GetValue(1);
-            r.o_smallint = (short)_reader.GetValue(2);
-            r.o_int = (int)_reader.GetValue(3);
-            r.o_bigint = (long)_reader.GetValue(4);
-            r.o_real = (float)_reader.GetValue(5);
-            r.o_float = (double)_reader.GetValue(6);
-            r.o_money = (Decimal)_reader.GetValue(7);
-            r.o_decimal = (Decimal)_reader.GetValue(8);
-            r.o_smalldatetime = (DateTime)_reader.GetValue(9);
-            r.o_date = (DateTime)_reader.GetValue(10);
-            r.o_datetime = (DateTime)_reader.GetValue(11);
-            r.o_datetimeoffset = (DateTimeOffset)_reader.GetValue(12);
-            r.o_time = (TimeSpan)_reader.GetValue(13);
-            r.o_nchar = (string)_reader.GetValue(14);
-            r.o_nvarchar = (string)_reader.GetValue(15);
-            r.o_binary = (byte[])_reader.GetValue(16);
-            r.o_varbinary = (byte[])_reader.GetValue(17);
-            r.o_uniqueidentifier = (Guid)_reader.GetValue(18);
+            var v0 = _reader.GetValue(0);
+            r.o_bit = (v0 is DBNull) ? false : (bool)v0;
+            var v1 = _reader.GetValue(1);
+            r.o_tinyint = (v1 is DBNull) ? (byte)0 : (byte)v1;
+            var v2 = _reader.GetValue(2);
+            r.o_smallint = (v2 is DBNull) ? (short)0 : (short)v2;
+            var v3 = _reader.GetValue(3);
+            r.o_int = (v3 is DBNull) ? 0 : (int)v3;
+            var v4 = _reader.GetValue(4);
+            r.o_bigint = (v4 is DBNull) ? 0L : (long)v4;
+            var v5 = _reader.GetValue(5);
+            r.o_real = (v5 is DBNull) ? 0f : (float)v5;
+            var v6 = _reader.GetValue(6);
+            r.o_float = (v6 is DBNull) ? 0.0 : (double)v6;
+            var v7 = _reader.GetValue(7);
+            r.o_money = (v7 is DBNull) ? 0M : (Decimal)v7;
+            var v8 = _reader.GetValue(8);
+            r.o_decimal = (v8 is DBNull) ? 0M : (Decimal)v8;
+            var v9 = _reader.GetValue(9);
+            r.o_smalldatetime = (v9 is DBNull) ? DateTime.MinValue : (DateTime)v9;
+            var v10 = _reader.GetValue(10);
+            r.o_date = (v10 is DBNull) ? DateTime.MinValue : (DateTime)v10;
+            var v11 = _reader.GetValue(11);
+            r.o_datetime = (v11 is DBNull) ? DateTime.MinValue : (DateTime)v11;
+            var v12 = _reader.GetValue(12);
+            r.o_datetimeoffset = (v12 is DBNull) ? DateTimeOffset.MinValue : (DateTimeOffset)v12;
+            var v13 = _reader.GetValue(13);
+            r.o_time = (v13 is DBNull) ? TimeSpan.Zero : (TimeSpan)v13;
+            var v14 = _reader.GetValue(14);
+            r.o_nchar = (v14 is DBNull) ? string.Empty : (string)v14;
+            var v15 = _reader.GetValue(15);
+            r.o_nvarchar = (v15 is DBNull) ? string.Empty : (string)v15;
+            var v16 = _reader.GetValue(16);
+            r.o_binary = (v16 is DBNull) ? new byte[0] : (byte[])v16;
+            var v17 = _reader.GetValue(17);
+            r.o_varbinary = (v17 is DBNull) ? new byte[0] : (byte[])v17;
+            var v18 = _reader.GetValue(18);
+            r.o_uniqueidentifier = (v18 is DBNull) ? Guid.Empty : (Guid)v18;
             return r;
         }
 
@@ -408,7 +519,173 @@ namespace Sql
         {
             if (await _reader.ReadAsync() == false) return null;
             var r = new Row();
-            r.Value = (int)_reader.GetValue(0);
+            var v0 = _reader.GetValue(0);
+            r.Value = (v0 is DBNull) ? 0 : (int)v0;
+            return r;
+        }
+
+        public async Task<List<Row>> FetchAllRowsAndDisposeAsync()
+        {
+            var rows = new List<Row>();
+            while (true)
+            {
+                var row = await NextAsync();
+                if (row == null) break;
+                rows.Add(row);
+            }
+            Dispose();
+            return rows;
+        }
+
+        public async Task<List<T>> FetchAllRowsAndDisposeAsync<T>(Func<Row, T> selector)
+        {
+            var rows = new List<T>();
+            while (true)
+            {
+                var row = await NextAsync();
+                if (row == null) break;
+                rows.Add(selector(row));
+            }
+            Dispose();
+            return rows;
+        }
+
+        public void Dispose()
+        {
+            _reader.Dispose();
+        }
+    }
+
+    public class DrString : IDisposable
+    {
+        private DbDataReader _reader;
+
+        public DrString(DbDataReader reader)
+        {
+            _reader = reader;
+        }
+
+        public class Row
+        {
+            public string Value;
+        }
+
+        public async Task<Row> NextAsync()
+        {
+            if (await _reader.ReadAsync() == false) return null;
+            var r = new Row();
+            var v0 = _reader.GetValue(0);
+            r.Value = (v0 is DBNull) ? string.Empty : (string)v0;
+            return r;
+        }
+
+        public async Task<List<Row>> FetchAllRowsAndDisposeAsync()
+        {
+            var rows = new List<Row>();
+            while (true)
+            {
+                var row = await NextAsync();
+                if (row == null) break;
+                rows.Add(row);
+            }
+            Dispose();
+            return rows;
+        }
+
+        public async Task<List<T>> FetchAllRowsAndDisposeAsync<T>(Func<Row, T> selector)
+        {
+            var rows = new List<T>();
+            while (true)
+            {
+                var row = await NextAsync();
+                if (row == null) break;
+                rows.Add(selector(row));
+            }
+            Dispose();
+            return rows;
+        }
+
+        public void Dispose()
+        {
+            _reader.Dispose();
+        }
+    }
+
+    public class DrNullableInt : IDisposable
+    {
+        private DbDataReader _reader;
+
+        public DrNullableInt(DbDataReader reader)
+        {
+            _reader = reader;
+        }
+
+        public class Row
+        {
+            public int? Value;
+        }
+
+        public async Task<Row> NextAsync()
+        {
+            if (await _reader.ReadAsync() == false) return null;
+            var r = new Row();
+            var v0 = _reader.GetValue(0);
+            r.Value = (v0 is DBNull) ? (int?)null : (int)v0;
+            return r;
+        }
+
+        public async Task<List<Row>> FetchAllRowsAndDisposeAsync()
+        {
+            var rows = new List<Row>();
+            while (true)
+            {
+                var row = await NextAsync();
+                if (row == null) break;
+                rows.Add(row);
+            }
+            Dispose();
+            return rows;
+        }
+
+        public async Task<List<T>> FetchAllRowsAndDisposeAsync<T>(Func<Row, T> selector)
+        {
+            var rows = new List<T>();
+            while (true)
+            {
+                var row = await NextAsync();
+                if (row == null) break;
+                rows.Add(selector(row));
+            }
+            Dispose();
+            return rows;
+        }
+
+        public void Dispose()
+        {
+            _reader.Dispose();
+        }
+    }
+
+    public class DrNullableString : IDisposable
+    {
+        private DbDataReader _reader;
+
+        public DrNullableString(DbDataReader reader)
+        {
+            _reader = reader;
+        }
+
+        public class Row
+        {
+            public string Value;
+        }
+
+        public async Task<Row> NextAsync()
+        {
+            if (await _reader.ReadAsync() == false) return null;
+            var r = new Row();
+            var v0 = _reader.GetValue(0);
+            r.Value = (v0 is DBNull) ? (string)null : (string)v0;
             return r;
         }
 

@@ -84,6 +84,8 @@
     <Content Include="Sql\EchoParametersAsRowset.sql" />
     <Content Include="Sql\GenerateInt.sql" />
     <Content Include="Sql\GenerateIntWithOutput.sql" />
+    <Content Include="Sql\GenerateNullableInt.sql" />
+    <Content Include="Sql\GenerateNullableString.sql" />
     <Content Include="Sql\RaiseError.sql" />
     <Content Include="Sql\SumInt.sql" />
     <Content Include="Sql\SumIntWithReturn.sql" />

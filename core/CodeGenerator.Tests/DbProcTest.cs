@@ -61,6 +61,37 @@ namespace CodeGenerator.Tests
             Assert.Equal(ret.message, "COUNT:10");
         }
 
+        [Fact]
+        private async Task Execute_StoredProcedure_ReturnNullableIntRowset_Succeeded()
+        {
+            var ret = await Sql.GenerateNullableInt.ExecuteAsync(_db.DbContext, 10);
+            var values = await ret.Rowset.FetchAllRowsAndDisposeAsync(r => r.Value);
+            Assert.Equal(Enumerable.Range(1, 10).Select(n => n % 2 == 1 ? (int?)n : null), values);
+        }
+
+        [Fact]
+        private async Task Execute_StoredProcedure_ReturnCoalescedIntRowset_Succeeded()
+        {
+            var ret = await Sql.GenerateCoalescedInt.ExecuteAsync(_db.DbContext, 10);
+            var values = await ret.Rowset.FetchAllRowsAndDisposeAsync(r => r.Value);
+            Assert.Equal(Enumerable.Range(1, 10).Select(n => n % 2 == 1 ? n : 0), values);
+        }
+
+        [Fact]
+        private async Task Execute_StoredProcedure_ReturnNullableStringRowset_Succeeded()
+        {
+            var ret = await Sql.GenerateNullableString.ExecuteAsync(_db.DbContext, 10);
+            var values = await ret.Rowset.FetchAllRowsAndDisposeAsync(r => r.Value);
+            Assert.Equal(Enumerable.Range(1, 10).Select(n => n % 2 == 1 ? n.ToString() : null), values);
+        }
+
+        [Fact]
+        private async Task Execute_StoredProcedure_ReturnCoalescedStringRowset_Succeeded()
+        {
+            var ret = await Sql.GenerateCoalescedString.ExecuteAsync(_db.DbContext, 10);
+            var values = await ret.Rowset.FetchAllRowsAndDisposeAsync(r => r.Value);
+            Assert.Equal(Enumerable.Range(1, 10).Select(n => n % 2 == 1 ? n.ToString() : ""), values);
+        }
 
         [Fact]
         private async Task Execute_StoredProcedure_RaiseError_Failed()

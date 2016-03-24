@@ -156,7 +156,10 @@ namespace CodeGenerator
 
         public static string GetMemberDecl(DbField p)
         {
-            return p.Type + " " + p.Name;
+            if (p.Nullable && IsValueType(p.Type))
+                return p.Type + "? " + p.Name;
+            else
+                return p.Type + " " + p.Name;
         }
     }
 }

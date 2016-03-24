@@ -6,6 +6,7 @@
         public string Type;
         public int Len;
         public string Dir;
+        public bool Nullable;
 
         public bool IsInput
         {
