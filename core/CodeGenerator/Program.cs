@@ -5,13 +5,14 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace CodeGenerator
 {
     public class Program
     {
         // "-s..\..\..\CodeGenerator.Tests\Sql\GenerateInt.sql;..\..\..\CodeGenerator.Tests\Sql\SumInt.sql" --target a.cs --nullable -n Sql
-        // "-i..\..\..\CodeGenerator.Tests\Generated\CodeGen.json --target a.cs -n Sql
+        // "-i..\..\..\CodeGenerator.Tests\Sql\@SqlProc.json" --target Output.cs -n Sql -p .*:sp\1
         static int Main(string[] args)
         {
             // Parse command line options
@@ -98,8 +99,11 @@ namespace CodeGenerator
 
         public class JsonProc
         {
+            public string ClassName;
             public string Path;
+            public string Source;
             public string Rowset;
+            public bool RowsetFetch;
         }
 
         public class JsonRowset
@@ -120,9 +124,21 @@ namespace CodeGenerator
                 var parser = new DbProcParser();
                 foreach (var jproc in joption.Procs)
                 {
-                    var decls = parser.Parse(File.ReadAllText(Path.Combine(baseDir, jproc.Path)));
-                    if (string.IsNullOrEmpty(jproc.Rowset) == false)
-                        decls.ForEach(d => d.Rowset = jproc.Rowset);
+                    List<DbProcDeclaration> decls;
+
+                    if (string.IsNullOrEmpty(jproc.Path) == false)
+                        decls = parser.Parse(File.ReadAllText(Path.Combine(baseDir, jproc.Path)));
+                    else if (string.IsNullOrEmpty(jproc.Source) == false)
+                        decls = parser.Parse(jproc.Source);
+                    else
+                        throw new ArgumentException("Path or Source is required: " + jproc);
+
+                    decls.ForEach(d =>
+                    {
+                        d.ClassName = jproc.ClassName;
+                        d.Rowset = jproc.Rowset;
+                        d.RowsetFetch = jproc.RowsetFetch;
+                    });
                     procs.AddRange(decls);
                 }
             }
@@ -149,12 +165,36 @@ namespace CodeGenerator
 
         private static void MakeClassName(Options options, IList<DbProcDeclaration> procs, IList<DbRowsetDeclaration> rowsets)
         {
-            foreach (var proc in procs)
+            foreach (var proc in procs.Where(p => string.IsNullOrEmpty(p.ClassName)))
+            {
                 proc.ClassName = proc.ProcName;
+
+                if (options.Patterns != null)
+                    proc.ClassName = ReplaceName(options.Patterns, proc.ProcName);
+            }
+        }
+
+        private static string ReplaceName(IEnumerable<string> patterns, string name)
+        {
+            foreach (var pattern in patterns)
+            {
+                var ps = pattern.Split(':');
+                if (ps.Length != 2)
+                    throw new ArgumentException("Illegal pattern: " + pattern);
+
+                var re = new Regex(ps[0]);
+                name = re.Replace(name, ps[1], 1);
+            }
+
+            return name;
         }
 
         private static int Process(Options options, IList<DbProcDeclaration> procs, IList<DbRowsetDeclaration> rowsets)
         {
+            // Generate code
+
+            Console.WriteLine("- Generate code");
+
             var writer = new TextCodeGenWriter();
 
             writer.AddUsing("System");
@@ -182,12 +222,28 @@ namespace CodeGenerator
             if (string.IsNullOrEmpty(options.Namespace) == false)
                 writer.PopNamespace();
 
-            var code = writer.ToString();
-            File.WriteAllText(options.TargetFile, code, Encoding.UTF8);
+            // save generated code
 
-            Console.WriteLine("Done");
+            Console.WriteLine("- Save code");
+
+            if (SaveFileIfChanged(options.TargetFile, writer.ToString()) == false)
+                Console.WriteLine("Nothing changed. Skip writing.");
 
             return 0;
+        }
+
+        private static bool SaveFileIfChanged(string path, string text)
+        {
+            if (File.Exists(path))
+            {
+                var existingText = File.ReadAllText(path);
+                if (existingText == text)
+                {
+                    return false;
+                }
+            }
+            File.WriteAllText(path, text);
+            return true;
         }
     }
 }

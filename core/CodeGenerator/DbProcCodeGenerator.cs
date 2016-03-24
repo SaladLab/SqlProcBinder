@@ -22,8 +22,11 @@ namespace CodeGenerator
                 sb.AppendLine("\t{");
                 if (string.IsNullOrEmpty(d.Rowset))
                     sb.AppendLine("\t\tpublic int AffectedRowCount;");
+                else if (d.RowsetFetch)
+                    sb.AppendFormat("\t\tpublic List<{0}.Row> Rows;\n", d.Rowset);
                 else
                     sb.AppendFormat("\t\tpublic {0} Rowset;\n", d.Rowset);
+
                 if (d.Return)
                     sb.AppendLine("\t\tpublic int Return;");
                 foreach (var p in d.Params.Where(p => p.IsOutput))
@@ -113,6 +116,8 @@ namespace CodeGenerator
 
                 if (string.IsNullOrEmpty(d.Rowset))
                     sb.AppendLine("\t\tr.AffectedRowCount = rowCount;");
+                else if (d.RowsetFetch)
+                    sb.AppendFormat("\t\tr.Rows = await (new {0}(reader)).FetchAllRowsAndDisposeAsync();\n", d.Rowset);
                 else
                     sb.AppendFormat("\t\tr.Rowset = new {0}(reader);\n", d.Rowset);
 

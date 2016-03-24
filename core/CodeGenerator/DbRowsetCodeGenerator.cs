@@ -51,6 +51,20 @@ namespace CodeGenerator
             sb.AppendLine("\t}");
 
             sb.AppendLine("");
+            sb.AppendLine("\tpublic async Task<List<Row>> FetchAllRowsAndDisposeAsync()");
+            sb.AppendLine("\t{");
+            sb.AppendLine("\t\tvar rows = new List<Row>();");
+            sb.AppendLine("\t\twhile (true)");
+            sb.AppendLine("\t\t{");
+            sb.AppendLine("\t\t\tvar row = await NextAsync();");
+            sb.AppendLine("\t\t\tif (row == null) break;");
+            sb.AppendLine("\t\t\trows.Add(row);");
+            sb.AppendLine("\t\t}");
+            sb.AppendLine("\t\tDispose();");
+            sb.AppendLine("\t\treturn rows;");
+            sb.AppendLine("\t}");
+
+            sb.AppendLine("");
             sb.AppendLine("\tpublic async Task<List<T>> FetchAllRowsAndDisposeAsync<T>(Func<Row, T> selector)");
             sb.AppendLine("\t{");
             sb.AppendLine("\t\tvar rows = new List<T>();");
