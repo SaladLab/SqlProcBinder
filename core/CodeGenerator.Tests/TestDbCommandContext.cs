@@ -47,7 +47,6 @@ namespace CodeGenerator.Tests
                     dropCommand.CommandText = string.Format(
                         "IF EXISTS (SELECT * FROM sys.objects WHERE type = 'P' AND name = '{0}') DROP PROCEDURE {0};",
                         _command.CommandText);
-                    ;
                     dropCommand.ExecuteNonQuery();
 
                     var createCommand = _connection.CreateCommand();
