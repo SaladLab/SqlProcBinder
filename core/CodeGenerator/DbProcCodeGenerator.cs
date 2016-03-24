@@ -69,13 +69,13 @@ namespace CodeGenerator
                 {
                     sb.AppendFormat(
                         "\t\tvar p{0} = cmd.AddParameter(\"@{1}\", {1}, ParameterDirection.InputOutput{2});\n",
-                        pidx, p.Name, p.Len > 0 ? ", " + p.Len : "");
+                        pidx, p.Name, (p.Len != 0) ? (", " + p.Len) : "");
                 }
                 else
                 {
                     sb.AppendFormat(
                         "\t\tvar p{0} = cmd.AddParameter(\"@{1}\", {2}, ParameterDirection.Output{3});\n",
-                        pidx, p.Name, DbTypeHelper.GetInitValue(p.Type), p.Len > 0 ? ", " + p.Len : "");
+                        pidx, p.Name, DbTypeHelper.GetInitValue(p.Type), (p.Len != 0) ? (", " + p.Len) : "");
                 }
                 pidx += 1;
             }
