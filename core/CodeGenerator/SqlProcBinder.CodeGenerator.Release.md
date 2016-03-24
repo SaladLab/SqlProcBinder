@@ -1,3 +1,7 @@
+## 0.3.1 (Released 2016/03/24)
+
+* Fix MAX length bug
+
 ## 0.3.0 (Released 2016/03/24)
 
 * Make generated code sql-agnostic
