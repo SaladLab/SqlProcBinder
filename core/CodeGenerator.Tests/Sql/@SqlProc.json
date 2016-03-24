@@ -1,10 +1,44 @@
 {
   "Procs": [
+    { "Path": "EchoParameters.sql" },
+    { "Path": "EchoParametersAsRowset.sql", "Rowset": "DrEcho" },
     { "Path": "GenerateInt.sql", "Rowset": "DrInt" },
+    { "Path": "GenerateInt.sql", "ClassName": "GenerateIntByRowset", "Rowset": "DbDataReader" },
     { "Path": "GenerateIntWithOutput.sql", "Rowset": "DrInt", "RowsetFetch": true },
-    { "Path": "SumInt.sql" }
+    { "Path": "RaiseError.sql" },
+    { "Path": "SumInt.sql" },
+    { "Path": "SumIntWithReturn.sql", "Return": true }
   ],
   "Rowsets": [
-    { "Name": "DrInt", "Fields": [ "int Value" ] }
+    {
+      "Name": "DrEcho",
+      "Fields": [
+        "bool o_bit",
+        "byte o_tinyint",
+        "short o_smallint",
+        "int o_int",
+        "long o_bigint",
+        "float o_real",
+        "double o_float",
+        "Decimal o_money",
+        "Decimal o_decimal",
+        "DateTime o_smalldatetime",
+        "DateTime o_date",
+        "DateTime o_datetime",
+        "DateTimeOffset o_datetimeoffset",
+        "TimeSpan o_time",
+        "string o_nchar",
+        "string o_nvarchar",
+        "byte[] o_binary",
+        "byte[] o_varbinary",
+        "Guid o_uniqueidentifier"
+      ]
+    },
+    {
+      "Name": "DrInt",
+      "Fields": [
+        "int Value"
+      ]
+    }
   ]
 }

@@ -80,9 +80,13 @@
     <None Include="Sql\%40SqlProc.json" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Sql\EchoParameters.sql" />
+    <Content Include="Sql\EchoParametersAsRowset.sql" />
     <Content Include="Sql\GenerateInt.sql" />
     <Content Include="Sql\GenerateIntWithOutput.sql" />
+    <Content Include="Sql\RaiseError.sql" />
     <Content Include="Sql\SumInt.sql" />
+    <Content Include="Sql\SumIntWithReturn.sql" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

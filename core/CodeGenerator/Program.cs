@@ -102,6 +102,7 @@ namespace CodeGenerator
             public string ClassName;
             public string Path;
             public string Source;
+            public bool Return;
             public string Rowset;
             public bool RowsetFetch;
         }
@@ -136,6 +137,7 @@ namespace CodeGenerator
                     decls.ForEach(d =>
                     {
                         d.ClassName = jproc.ClassName;
+                        d.Return = jproc.Return;
                         d.Rowset = jproc.Rowset;
                         d.RowsetFetch = jproc.RowsetFetch;
                     });
@@ -152,7 +154,7 @@ namespace CodeGenerator
                     rowset.Fields = jrowset.Fields.Select(s =>
                     {
                         var strs = s.Split();
-                        return new DbHelper.Field
+                        return new DbField
                         {
                             Type = strs[0],
                             Name = strs[1]

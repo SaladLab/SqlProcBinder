@@ -50,12 +50,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DbHelper.cs" />
+    <Compile Include="DbField.cs" />
     <Compile Include="DbProcCodeGenerator.cs" />
     <Compile Include="DbProcDeclaration.cs" />
     <Compile Include="DbProcParser.cs" />
     <Compile Include="DbRowsetCodeGenerator.cs" />
     <Compile Include="DbRowsetDeclaration.cs" />
+    <Compile Include="DbTypeHelper.cs" />
     <Compile Include="ICodeGenWriter.cs" />
     <Compile Include="Options.cs" />
     <Compile Include="Program.cs" />

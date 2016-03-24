@@ -11,6 +11,6 @@ namespace CodeGenerator
         public bool Return;
         public string Rowset;
         public bool RowsetFetch;
-        public List<DbHelper.Field> Params;
+        public List<DbField> Params;
     }
 }

@@ -19,7 +19,7 @@ namespace CodeGenerator
             {
                 var decl = new DbProcDeclaration();
                 decl.ProcName = match.Groups[2].Value;
-                decl.Params = new List<DbHelper.Field>();
+                decl.Params = new List<DbField>();
 
                 var paramsText = match.Groups[3].Value.Trim();
                 if (paramsText.StartsWith("(") && paramsText.EndsWith(")"))
@@ -36,11 +36,11 @@ namespace CodeGenerator
                     var paramType = parameters[1];
                     var paramOutput = (parameters.Length >= 3 && parameters[2].ToLower() == "output");
 
-                    var type = DbHelper.GetTypeFromSqlType(paramType);
+                    var type = DbTypeHelper.GetTypeFromSqlType(paramType);
                     if (type == null)
                         throw new Exception("Cannot resolve type: " + paramType);
 
-                    decl.Params.Add(new DbHelper.Field
+                    decl.Params.Add(new DbField
                     {
                         Name = paramName.Substring(1),
                         Type = type.Item1,

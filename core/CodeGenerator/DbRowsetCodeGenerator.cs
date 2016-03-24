@@ -22,7 +22,7 @@ namespace CodeGenerator
             sb.AppendLine("\t{");
             foreach (var field in d.Fields)
             {
-                sb.AppendFormat("\t\tpublic {0};\n", DbHelper.GetMemberDecl(field));
+                sb.AppendFormat("\t\tpublic {0};\n", DbTypeHelper.GetMemberDecl(field));
             }
             sb.AppendLine("\t}");
             sb.AppendLine("");
@@ -34,17 +34,8 @@ namespace CodeGenerator
             var fidx = 0;
             foreach (var field in d.Fields)
             {
-                var bclType = DbHelper.GetBclType(field.Type);
-                if (bclType != "Boolean")
-                {
-                    sb.AppendFormat("\t\tr.{0} = _reader.Get{1}({2});\n",
-                                    field.Name, DbHelper.GetBclType(field.Type), fidx);
-                }
-                else
-                {
-                    sb.AppendFormat("\t\tr.{0} = _reader.GetByte({1}) != 0;\n",
-                                    field.Name, fidx);
-                }
+                sb.AppendFormat("\t\tr.{0} = ({1})_reader.GetValue({2});\n",
+                                field.Name, field.Type, fidx);
                 fidx += 1;
             }
             sb.AppendLine("\t\treturn r;");

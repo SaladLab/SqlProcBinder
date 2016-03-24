@@ -30,12 +30,12 @@ namespace CodeGenerator
                 if (d.Return)
                     sb.AppendLine("\t\tpublic int Return;");
                 foreach (var p in d.Params.Where(p => p.IsOutput))
-                    sb.AppendFormat("\t\tpublic {0};\n", DbHelper.GetMemberDecl(p));
+                    sb.AppendFormat("\t\tpublic {0};\n", DbTypeHelper.GetMemberDecl(p));
                 sb.AppendLine("\t}");
                 sb.AppendLine("");
             }
 
-            var paramStr = string.Join(", ", d.Params.Where(p => p.IsInput).Select(DbHelper.GetParamDecl));
+            var paramStr = string.Join(", ", d.Params.Where(p => p.IsInput).Select(DbTypeHelper.GetParamDecl));
             sb.AppendFormat("\tpublic static async Task<{0}> ExecuteAsync(SqlProcBinder.IDbContext dc{1}{2})\n",
                             resultExists ? "Result" : "int",
                             paramStr.Length > 0 ? ", " : "",
@@ -87,7 +87,7 @@ namespace CodeGenerator
                 {
                     sb.AppendFormat(
                         "\t\tvar p{0} = cmd.Parameters.AddWithValue(\"@{1}\", {2});\n",
-                        pidx, p.Name, DbHelper.GetInitValue(p.Type));
+                        pidx, p.Name, DbTypeHelper.GetInitValue(p.Type));
                     sb.AppendFormat(
                         "\t\tp{0}.Direction = ParameterDirection.Output;\n",
                         pidx);
@@ -118,6 +118,8 @@ namespace CodeGenerator
                     sb.AppendLine("\t\tr.AffectedRowCount = rowCount;");
                 else if (d.RowsetFetch)
                     sb.AppendFormat("\t\tr.Rows = await (new {0}(reader)).FetchAllRowsAndDisposeAsync();\n", d.Rowset);
+                else if (d.Rowset == "DbDataReader")
+                    sb.AppendFormat("\t\tr.Rowset = reader;\n", d.Rowset);
                 else
                     sb.AppendFormat("\t\tr.Rowset = new {0}(reader);\n", d.Rowset);
 
@@ -126,11 +128,11 @@ namespace CodeGenerator
                 {
                     if (p.IsOutput)
                     {
-                        if (DbHelper.IsValueType(p.Type))
+                        if (DbTypeHelper.IsValueType(p.Type))
                         {
                             sb.AppendFormat(
                                 "\t\tr.{0} = (p{2}.Value is DBNull) ? {3} : ({1})p{2}.Value;\n",
-                                p.Name, p.Type, pidx, DbHelper.GetInitValue(p.Type));
+                                p.Name, p.Type, pidx, DbTypeHelper.GetInitValue(p.Type));
                         }
                         else
                         {

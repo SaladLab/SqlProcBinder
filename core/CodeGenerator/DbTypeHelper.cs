@@ -4,28 +4,8 @@ using Newtonsoft.Json;
 
 namespace CodeGenerator
 {
-    public static class DbHelper
+    public static class DbTypeHelper
     {
-        public class Field
-        {
-            public string Name;
-            public string Type;
-            public int Len;
-            public string Dir;
-
-            [JsonIgnore]
-            public bool IsInput
-            {
-                get { return string.IsNullOrEmpty(Dir) || Dir == "in" || Dir == "ref"; }
-            }
-
-            [JsonIgnore]
-            public bool IsOutput
-            {
-                get { return Dir == "ref" || Dir == "out"; }
-            }
-        }
-
         public static string GetDirDecoration(string dir)
         {
             switch (dir)
@@ -42,35 +22,6 @@ namespace CodeGenerator
             }
         }
 
-        public static string GetBclType(string type)
-        {
-            switch (type)
-            {
-                case "bool":
-                    return "Boolean";
-                case "byte":
-                    return "Byte";
-                case "short":
-                    return "Int16";
-                case "int":
-                    return "Int32";
-                case "long":
-                    return "Int64";
-                case "float":
-                    return "Float";
-                case "double":
-                    return "Double";
-                case "DateTime":
-                    return "DateTime";
-                case "string":
-                    return "String";
-                case "Guid":
-                    return "Guid";
-                default:
-                    return type;
-            }
-        }
-
         public static string GetInitValue(string type)
         {
             switch (type)
@@ -84,15 +35,23 @@ namespace CodeGenerator
                 case "int":
                     return "0";
                 case "long":
-                    return "(long)0";
+                    return "0L";
                 case "float":
                     return "0f";
                 case "double":
                     return "0.0";
+                case "Decimal":
+                    return "0M";
                 case "DateTime":
                     return "DateTime.MinValue";
+                case "DateTimeOffset":
+                    return "DateTimeOffset.MinValue";
+                case "TimeSpan":
+                    return "TimeSpan.Zero";
                 case "string":
                     return "string.Empty";
+                case "byte[]":
+                    return "new byte[0]";
                 case "Guid":
                     return "Guid.Empty";
                 default:
@@ -111,7 +70,10 @@ namespace CodeGenerator
                 case "long":
                 case "float":
                 case "double":
+                case "Decimal":
                 case "DateTime":
+                case "DateTimeOffset":
+                case "TimeSpan":
                 case "Guid":
                     return true;
 
@@ -140,14 +102,22 @@ namespace CodeGenerator
                     return Tuple.Create("long", 0);
                 case "real":
                     return Tuple.Create("float", 0);
+                case "float":
                 case "float(53)":
                     return Tuple.Create("double", 0);
+                case "money":
+                case "decimal":
+                    return Tuple.Create("Decimal", 0);
                 case "smalldatetime":
                     return Tuple.Create("DateTime", 0);
+                case "date":
                 case "datetime":
+                case "datetime2":
                     return Tuple.Create("DateTime", 0);
-                case "text":
-                    return Tuple.Create("string", 0);
+                case "datetimeoffset":
+                    return Tuple.Create("DateTimeOffset", 0);
+                case "time":
+                    return Tuple.Create("TimeSpan", 0);
                 case "uniqueidentifier":
                     return Tuple.Create("Guid", 0);
             }
@@ -164,21 +134,28 @@ namespace CodeGenerator
                     return Tuple.Create("string", size);
                 }
             }
-            if (t.StartsWith("utt"))
+            if (t.StartsWith("binary") ||
+                t.StartsWith("varbinary"))
             {
-                return Tuple.Create("DataTable", 0);
+                var mo = Regex.Match(t, @"\w*\((\w+)\)");
+                if (mo.Success)
+                {
+                    var param = mo.Groups[1].Value;
+                    var size = (param.ToLower() == "max") ? -1 : int.Parse(mo.Groups[1].Value);
+                    return Tuple.Create("byte[]", size);
+                }
             }
 
             return null;
         }
 
-        public static string GetParamDecl(Field p)
+        public static string GetParamDecl(DbField p)
         {
             var deco = GetDirDecoration(p.Dir);
             return (string.IsNullOrEmpty(deco) ? p.Type : deco + " " + p.Type) + " " + p.Name;
         }
 
-        public static string GetMemberDecl(Field p)
+        public static string GetMemberDecl(DbField p)
         {
             return p.Type + " " + p.Name;
         }
