@@ -81,6 +81,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Sql\GenerateInt.sql" />
+    <Content Include="Sql\GenerateIntWithOutput.sql" />
     <Content Include="Sql\SumInt.sql" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

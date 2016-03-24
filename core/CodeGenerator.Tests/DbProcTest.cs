@@ -27,5 +27,13 @@ namespace CodeGenerator.Tests
             var values = await ret.Rowset.FetchAllRowsAndDisposeAsync(r => r.Value);
             Assert.Equal(Enumerable.Range(1, 10), values);
         }
+
+        [Fact]
+        private async Task Execute_StoredProcedure_ReturnRowsetWithOutput_Succeeded()
+        {
+            var ret = await Sql.GenerateIntWithOutput.ExecuteAsync(_db.DbContext, 10);
+            Assert.Equal(Enumerable.Range(1, 10), ret.Rows.Select(r => r.Value));
+            Assert.Equal(ret.message, "COUNT:10");
+        }
     }
 }

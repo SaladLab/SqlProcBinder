@@ -1,6 +1,7 @@
 {
   "Procs": [
     { "Path": "GenerateInt.sql", "Rowset": "DrInt" },
+    { "Path": "GenerateIntWithOutput.sql", "Rowset": "DrInt", "RowsetFetch": true },
     { "Path": "SumInt.sql" }
   ],
   "Rowsets": [

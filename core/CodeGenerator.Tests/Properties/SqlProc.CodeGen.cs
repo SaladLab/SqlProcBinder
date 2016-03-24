@@ -39,6 +39,34 @@ namespace Sql
         }
     }
 
+    public class GenerateIntWithOutput
+    {
+        public struct Result
+        {
+            public List<DrInt.Row> Rows;
+            public string message;
+        }
+
+        public static async Task<Result> ExecuteAsync(SqlProcBinder.IDbContext dc, int count)
+        {
+            var ctx = dc.CreateCommand();
+            var cmd = (SqlCommand)ctx.Command;
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.CommandText = "GenerateIntWithOutput";
+            cmd.Parameters.AddWithValue("@count", count);
+            var p1 = cmd.Parameters.AddWithValue("@message", string.Empty);
+            p1.Direction = ParameterDirection.Output;
+            p1.Size = 100;
+            ctx.OnExecuting();
+            var reader = await cmd.ExecuteReaderAsync();
+            var r = new Result();
+            r.Rows = await (new DrInt(reader)).FetchAllRowsAndDisposeAsync();
+            r.message = (p1.Value is DBNull) ? null : (string)p1.Value;
+            ctx.OnExecuted();
+            return r;
+        }
+    }
+
     public class SumInt
     {
         public struct Result
@@ -87,6 +115,19 @@ namespace Sql
             var r = new Row();
             r.Value = _reader.GetInt32(0);
             return r;
+        }
+
+        public async Task<List<Row>> FetchAllRowsAndDisposeAsync()
+        {
+            var rows = new List<Row>();
+            while (true)
+            {
+                var row = await NextAsync();
+                if (row == null) break;
+                rows.Add(row);
+            }
+            Dispose();
+            return rows;
         }
 
         public async Task<List<T>> FetchAllRowsAndDisposeAsync<T>(Func<Row, T> selector)
