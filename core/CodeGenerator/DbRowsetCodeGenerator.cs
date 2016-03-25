@@ -1,93 +1,90 @@
-﻿using System.Text;
+﻿using CodeWriter;
 
 namespace CodeGenerator
 {
     public class DbRowsetCodeGenerator
     {
-        public void Generate(DbRowsetDeclaration d, ICodeGenWriter writer)
+        public void Generate(DbRowsetDeclaration d, CodeWriter.CodeWriter w)
         {
-            var sb = new StringBuilder();
-            sb.AppendFormat("public class {0} : IDisposable\n", d.ClassName);
-            sb.AppendLine("{");
-
-            sb.AppendLine("\tprivate DbDataReader _reader;");
-            sb.AppendLine("");
-            sb.AppendFormat("\tpublic {0}(DbDataReader reader)\n", d.ClassName);
-            sb.AppendLine("\t{");
-            sb.AppendLine("\t\t_reader = reader;");
-            sb.AppendLine("\t}");
-            sb.AppendLine("");
-
-            sb.AppendLine("\tpublic class Row");
-            sb.AppendLine("\t{");
-            foreach (var field in d.Fields)
+            using (w.B($"public class {d.ClassName} : IDisposable"))
             {
-                sb.AppendFormat("\t\tpublic {0};\n", DbTypeHelper.GetMemberDecl(field));
-            }
-            sb.AppendLine("\t}");
-            sb.AppendLine("");
+                w._($"private DbDataReader _reader;");
+                w._();
 
-            sb.AppendLine("\tpublic async Task<Row> NextAsync()");
-            sb.AppendLine("\t{");
-            sb.AppendLine("\t\tif (await _reader.ReadAsync() == false) return null;");
-            sb.AppendLine("\t\tvar r = new Row();");
-            var fidx = 0;
-            foreach (var field in d.Fields)
+                using (w.B($"public {d.ClassName}(DbDataReader reader)"))
+                {
+                    w._($"_reader = reader;");
+                }
+
+                using (w.B($"public class Row"))
+                {
+                    foreach (var field in d.Fields)
+                    {
+                        w._($"public {DbTypeHelper.GetMemberDecl(field)};");
+                    }
+                }
+
+                GenerateMethods(d, w);
+            }
+        }
+
+        public void GenerateMethods(DbRowsetDeclaration d, CodeWriter.CodeWriter w)
+        {
+            using (w.B($"public async Task<Row> NextAsync()"))
             {
-                sb.AppendLine($"\t\tvar v{fidx} = _reader.GetValue({fidx});");
-                if (field.Nullable)
+                w._($"if (await _reader.ReadAsync() == false) return null;",
+                    $"var r = new Row();");
+
+                var fidx = 0;
+                foreach (var field in d.Fields)
                 {
-                    var typeSuffix = DbTypeHelper.IsValueType(field.Type) ? "?" : "";
-                    sb.AppendFormat("\t\tr.{0} = (v{3} is DBNull) ? ({1}{2})null : ({1})v{3};\n",
-                                    field.Name, field.Type, typeSuffix, fidx);
+                    w._($"var v{fidx} = _reader.GetValue({fidx});");
+                    if (field.Nullable)
+                    {
+                        var ntype = field.Type + (DbTypeHelper.IsValueType(field.Type) ? "?" : "");
+                        w._($"r.{field.Name} = (v{fidx} is DBNull) ? ({ntype})null : ({field.Type})v{fidx};");
+                    }
+                    else
+                    {
+                        var ivalue = DbTypeHelper.GetInitValue(field.Type);
+                        w._($"r.{field.Name} = (v{fidx} is DBNull) ? {ivalue} : ({field.Type})v{fidx};");
+                    }
+                    fidx += 1;
                 }
-                else
-                {
-                    sb.AppendFormat("\t\tr.{0} = (v{3} is DBNull) ? {2} : ({1})v{3};\n",
-                                    field.Name, field.Type, DbTypeHelper.GetInitValue(field.Type), fidx);
-                }
-                fidx += 1;
+
+                w._($"return r;");
             }
-            sb.AppendLine("\t\treturn r;");
-            sb.AppendLine("\t}");
 
-            sb.AppendLine("");
-            sb.AppendLine("\tpublic async Task<List<Row>> FetchAllRowsAndDisposeAsync()");
-            sb.AppendLine("\t{");
-            sb.AppendLine("\t\tvar rows = new List<Row>();");
-            sb.AppendLine("\t\twhile (true)");
-            sb.AppendLine("\t\t{");
-            sb.AppendLine("\t\t\tvar row = await NextAsync();");
-            sb.AppendLine("\t\t\tif (row == null) break;");
-            sb.AppendLine("\t\t\trows.Add(row);");
-            sb.AppendLine("\t\t}");
-            sb.AppendLine("\t\tDispose();");
-            sb.AppendLine("\t\treturn rows;");
-            sb.AppendLine("\t}");
+            using (w.B($"public async Task<List<Row>> FetchAllRowsAndDisposeAsync()"))
+            {
+                w._($"var rows = new List<Row>();");
+                using (w.b($"while (true)"))
+                {
+                    w._($"var row = await NextAsync();",
+                        $"if (row == null) break;",
+                        $"rows.Add(row);");
+                }
+                w._($"Dispose();",
+                    $"return rows;");
+            }
 
-            sb.AppendLine("");
-            sb.AppendLine("\tpublic async Task<List<T>> FetchAllRowsAndDisposeAsync<T>(Func<Row, T> selector)");
-            sb.AppendLine("\t{");
-            sb.AppendLine("\t\tvar rows = new List<T>();");
-            sb.AppendLine("\t\twhile (true)");
-            sb.AppendLine("\t\t{");
-            sb.AppendLine("\t\t\tvar row = await NextAsync();");
-            sb.AppendLine("\t\t\tif (row == null) break;");
-            sb.AppendLine("\t\t\trows.Add(selector(row));");
-            sb.AppendLine("\t\t}");
-            sb.AppendLine("\t\tDispose();");
-            sb.AppendLine("\t\treturn rows;");
-            sb.AppendLine("\t}");
+            using (w.B($"public async Task<List<T>> FetchAllRowsAndDisposeAsync<T>(Func<Row, T> selector)"))
+            {
+                w._($"var rows = new List<T>();");
+                using (w.b($"while (true)"))
+                {
+                    w._($"var row = await NextAsync();",
+                        $"if (row == null) break;",
+                        $"rows.Add(selector(row));");
+                }
+                w._($"Dispose();",
+                    $"return rows;");
+            }
 
-            sb.AppendLine("");
-            sb.AppendLine("\tpublic void Dispose()");
-            sb.AppendLine("\t{");
-            sb.AppendLine("\t\t_reader.Dispose();");
-            sb.AppendLine("\t}");
-
-            sb.Append("}");
-
-            writer.AddCode(sb.ToString());
+            using (w.B($"public void Dispose()"))
+            {
+                w._($"_reader.Dispose();");
+            }
         }
     }
 }

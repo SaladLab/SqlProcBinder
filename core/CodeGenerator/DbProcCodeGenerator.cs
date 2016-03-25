@@ -1,135 +1,137 @@
-﻿using System.IO;
+﻿using CodeWriter;
 using System.Linq;
-using System.Text;
 
 namespace CodeGenerator
 {
     public class DbProcCodeGenerator
     {
-        public void Generate(DbProcDeclaration d, ICodeGenWriter writer)
+        public void Generate(DbProcDeclaration d, CodeWriter.CodeWriter w)
         {
-            // Class
-
-            var sb = new StringBuilder();
-            sb.AppendFormat("public class {0}\n", d.ClassName);
-            sb.AppendLine("{");
-
-            var resultExists = (d.Return ||
-                                !string.IsNullOrEmpty(d.Rowset) ||
-                                d.Params.Exists(p => p.IsOutput));
-            if (resultExists)
+            using (w.B($"public class {d.ClassName}"))
             {
-                sb.AppendLine("\tpublic struct Result");
-                sb.AppendLine("\t{");
+                if (NeedResultStruct(d))
+                {
+                    GenerateResultStruct(d, w);
+                    w._();
+                }
+
+                GenerateExecuteMethod(d, w);
+            }
+        }
+
+        public bool NeedResultStruct(DbProcDeclaration d)
+        {
+            return d.Return ||
+                   string.IsNullOrEmpty(d.Rowset) == false ||
+                   d.Params.Exists(p => p.IsOutput);
+        }
+
+        public void GenerateResultStruct(DbProcDeclaration d, CodeWriter.CodeWriter w)
+        {
+            using (w.B($"public struct Result"))
+            {
                 if (string.IsNullOrEmpty(d.Rowset))
-                    sb.AppendLine("\t\tpublic int AffectedRowCount;");
+                    w._($"public int AffectedRowCount;");
                 else if (d.RowsetFetch)
-                    sb.AppendFormat("\t\tpublic List<{0}.Row> Rows;\n", d.Rowset);
+                    w._($"public List<{d.Rowset}.Row> Rows;");
                 else
-                    sb.AppendFormat("\t\tpublic {0} Rowset;\n", d.Rowset);
+                    w._($"public {d.Rowset} Rowset;");
 
                 if (d.Return)
-                    sb.AppendLine("\t\tpublic int Return;");
+                    w._($"public int Return;");
                 foreach (var p in d.Params.Where(p => p.IsOutput))
-                    sb.AppendFormat("\t\tpublic {0};\n", DbTypeHelper.GetMemberDecl(p));
-                sb.AppendLine("\t}");
-                sb.AppendLine("");
+                    w._($"public {DbTypeHelper.GetMemberDecl(p)};");
             }
+        }
 
-            var paramStr = string.Join(", ", d.Params.Where(p => p.IsInput).Select(DbTypeHelper.GetParamDecl));
-            sb.AppendFormat("\tpublic static async Task<{0}> ExecuteAsync(IDbContext dc{1}{2})\n",
-                            resultExists ? "Result" : "int",
-                            paramStr.Length > 0 ? ", " : "",
-                            paramStr);
-            sb.AppendLine("\t{");
+        public void GenerateExecuteMethod(DbProcDeclaration d, CodeWriter.CodeWriter w)
+        {
+            var returnType = NeedResultStruct(d) ? "Result" : "int";
+            var paramStr = string.Concat(d.Params.Where(p => p.IsInput)
+                                          .Select(p => ", " + DbTypeHelper.GetParamDecl(p)));
 
-            sb.AppendFormat("\t\tvar ctx = dc.CreateCommand();\n");
-            sb.AppendFormat("\t\tvar cmd = ctx.Command;\n");
-            sb.AppendFormat("\t\tcmd.CommandType = CommandType.StoredProcedure;\n");
-            sb.AppendFormat("\t\tcmd.CommandText = \"{0}\";\n", d.ProcName);
-            var pidx = 0;
-            foreach (var p in d.Params)
+            using (w.B($"public static async Task<{returnType}> ExecuteAsync(IDbContext dc{paramStr})"))
             {
-                if (p.IsInput && p.IsOutput == false)
+                w._($"var ctx = dc.CreateCommand();",
+                    $"var cmd = ctx.Command;",
+                    $"cmd.CommandType = CommandType.StoredProcedure;",
+                    $"cmd.CommandText = `{d.ProcName}`;");
+
+                var pidx = 0;
+                foreach (var p in d.Params)
                 {
-                    if (p.Type == "DataTable")
+                    var lenStr = (p.Len != 0) ? (", " + p.Len) : "";
+                    if (p.IsInput && p.IsOutput == false)
                     {
-                        sb.AppendFormat(
-                            "\t\tcmd.AddParameter(\"@{0}\", {1}).SqlDbType = SqlDbType.Structured;\n",
-                            p.Name, p.Name);
+                        if (p.Type == "DataTable")
+                        {
+                            w._($"cmd.AddParameter(`@{p.Name}`, {p.Name}).SqlDbType = SqlDbType.Structured;");
+                        }
+                        else
+                        {
+                            w._($"cmd.AddParameter(`@{p.Name}`, {p.Name});");
+                        }
+                    }
+                    else if (p.IsInput && p.IsOutput)
+                    {
+                        w._($"var p{pidx} = cmd.AddParameter(`@{p.Name}`, {p.Name}, " +
+                            $"ParameterDirection.InputOutput{lenStr});");
                     }
                     else
                     {
-                        sb.AppendFormat(
-                            "\t\tcmd.AddParameter(\"@{0}\", {1});\n",
-                            p.Name, p.Name);
-                    }
-                }
-                else if (p.IsInput && p.IsOutput)
-                {
-                    sb.AppendFormat(
-                        "\t\tvar p{0} = cmd.AddParameter(\"@{1}\", {1}, ParameterDirection.InputOutput{2});\n",
-                        pidx, p.Name, (p.Len != 0) ? (", " + p.Len) : "");
-                }
-                else
-                {
-                    sb.AppendFormat(
-                        "\t\tvar p{0} = cmd.AddParameter(\"@{1}\", {2}, ParameterDirection.Output{3});\n",
-                        pidx, p.Name, DbTypeHelper.GetInitValue(p.Type), (p.Len != 0) ? (", " + p.Len) : "");
-                }
-                pidx += 1;
-            }
-            if (d.Return)
-            {
-                sb.AppendLine("\t\tvar pr = cmd.AddParameter(null, null, ParameterDirection.ReturnValue);");
-            }
-
-            sb.AppendLine("\t\tctx.OnExecuting();");
-            if (resultExists)
-            {
-                if (string.IsNullOrEmpty(d.Rowset))
-                    sb.AppendLine("\t\tvar rowCount = await cmd.ExecuteNonQueryAsync();");
-                else
-                    sb.AppendFormat("\t\tvar reader = await cmd.ExecuteReaderAsync();\n");
-
-                sb.AppendLine("\t\tvar r = new Result();");
-
-                if (string.IsNullOrEmpty(d.Rowset))
-                    sb.AppendLine("\t\tr.AffectedRowCount = rowCount;");
-                else if (d.RowsetFetch)
-                    sb.AppendFormat("\t\tr.Rows = await (new {0}(reader)).FetchAllRowsAndDisposeAsync();\n", d.Rowset);
-                else if (d.Rowset == "DbDataReader")
-                    sb.AppendFormat("\t\tr.Rowset = reader;\n", d.Rowset);
-                else
-                    sb.AppendFormat("\t\tr.Rowset = new {0}(reader);\n", d.Rowset);
-
-                pidx = 0;
-                foreach (var p in d.Params)
-                {
-                    if (p.IsOutput)
-                    {
-                        sb.AppendFormat(
-                            "\t\tr.{0} = (p{2}.Value is DBNull) ? {3} : ({1})p{2}.Value;\n",
-                            p.Name, p.Type, pidx, DbTypeHelper.GetInitValue(p.Type));
+                        var ivalue = DbTypeHelper.GetInitValue(p.Type);
+                        w._($"var p{pidx} = cmd.AddParameter(`@{p.Name}`, {ivalue}, " +
+                            $"ParameterDirection.Output{lenStr});");
                     }
                     pidx += 1;
                 }
-
                 if (d.Return)
-                    sb.AppendLine("\t\tr.Return = (int)pr.Value;");
+                {
+                    w._($"var pr = cmd.AddParameter(null, null, ParameterDirection.ReturnValue);");
+                }
+
+                w._($"ctx.OnExecuting();");
+
+                if (NeedResultStruct(d))
+                {
+                    if (string.IsNullOrEmpty(d.Rowset))
+                        w._($"var rowCount = await cmd.ExecuteNonQueryAsync();");
+                    else
+                        w._($"var reader = await cmd.ExecuteReaderAsync();");
+
+                    w._($"var r = new Result();");
+
+                    if (string.IsNullOrEmpty(d.Rowset))
+                        w._($"r.AffectedRowCount = rowCount;");
+                    else if (d.RowsetFetch)
+                        w._($"r.Rows = await (new {d.Rowset}(reader)).FetchAllRowsAndDisposeAsync();");
+                    else if (d.Rowset == "DbDataReader")
+                        w._($"r.Rowset = reader;");
+                    else
+                        w._($"r.Rowset = new {d.Rowset}(reader);");
+
+                    pidx = 0;
+                    foreach (var p in d.Params)
+                    {
+                        if (p.IsOutput)
+                        {
+                            var ivalue = DbTypeHelper.GetInitValue(p.Type);
+                            w._($"r.{p.Name} = (p{pidx}.Value is DBNull) ? {ivalue} : ({p.Type})p{pidx}.Value;");
+                        }
+                        pidx += 1;
+                    }
+
+                    if (d.Return)
+                        w._($"r.Return = (int)pr.Value;");
+                }
+                else
+                {
+                    w._($"var r = await cmd.ExecuteNonQueryAsync();");
+                }
+
+                w._($"ctx.OnExecuted();");
+                w._($"return r;");
             }
-            else
-            {
-                sb.AppendLine("\t\tvar r = await cmd.ExecuteNonQueryAsync();");
-            }
-
-            sb.AppendLine("\t\tctx.OnExecuted();");
-            sb.AppendLine("\t\treturn r;");
-            sb.AppendLine("\t}");
-
-            sb.Append("}");
-
-            writer.AddCode(sb.ToString());
         }
     }
 }
