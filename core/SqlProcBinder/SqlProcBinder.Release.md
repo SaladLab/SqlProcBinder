@@ -1,3 +1,7 @@
+## 1.0.0 (Released 2016/03/25)
+
+* Add nullable type support
+
 ## 0.3.0 (Released 2016/03/24)
 
 * Add SqlBindHelper to make code shorter

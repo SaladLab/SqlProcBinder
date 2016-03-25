@@ -1,3 +1,7 @@
+## 1.0.0 (Released 2016/03/25)
+
+* Add nullable type support
+
 ## 0.3.1 (Released 2016/03/24)
 
 * Fix MAX length bug
