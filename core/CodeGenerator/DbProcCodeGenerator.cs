@@ -1,5 +1,5 @@
-﻿using CodeWriter;
-using System.Linq;
+﻿using System.Linq;
+using CodeWriter;
 
 namespace CodeGenerator
 {
@@ -87,7 +87,7 @@ namespace CodeGenerator
                 }
                 if (d.Return)
                 {
-                    w._($"var pr = cmd.AddParameter(null, null, ParameterDirection.ReturnValue);");
+                    w._($"var pr = cmd.AddParameter(null, 0, ParameterDirection.ReturnValue);");
                 }
 
                 w._($"ctx.OnExecuting();");
@@ -115,8 +115,16 @@ namespace CodeGenerator
                     {
                         if (p.IsOutput)
                         {
-                            var ivalue = DbTypeHelper.GetInitValue(p.Type);
-                            w._($"r.{p.Name} = (p{pidx}.Value is DBNull) ? {ivalue} : ({p.Type})p{pidx}.Value;");
+                            if (p.Nullable)
+                            {
+                                var ntype = DbTypeHelper.GetType(p);
+                                w._($"r.{p.Name} = (p{pidx}.Value is DBNull) ? ({ntype})null : ({p.Type})p{pidx}.Value;");
+                            }
+                            else
+                            {
+                                var ivalue = DbTypeHelper.GetInitValue(p.Type);
+                                w._($"r.{p.Name} = (p{pidx}.Value is DBNull) ? {ivalue} : ({p.Type})p{pidx}.Value;");
+                            }
                         }
                         pidx += 1;
                     }

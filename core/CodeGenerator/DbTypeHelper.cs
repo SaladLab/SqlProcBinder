@@ -39,7 +39,7 @@ namespace CodeGenerator
                     return "0f";
                 case "double":
                     return "0.0";
-                case "Decimal":
+                case "decimal":
                     return "0M";
                 case "DateTime":
                     return "DateTime.MinValue";
@@ -69,7 +69,7 @@ namespace CodeGenerator
                 case "long":
                 case "float":
                 case "double":
-                case "Decimal":
+                case "decimal":
                 case "DateTime":
                 case "DateTimeOffset":
                 case "TimeSpan":
@@ -106,7 +106,7 @@ namespace CodeGenerator
                     return Tuple.Create("double", 0);
                 case "money":
                 case "decimal":
-                    return Tuple.Create("Decimal", 0);
+                    return Tuple.Create("decimal", 0);
                 case "smalldatetime":
                     return Tuple.Create("DateTime", 0);
                 case "date":
@@ -148,18 +148,20 @@ namespace CodeGenerator
             return null;
         }
 
+        public static string GetType(DbField p)
+        {
+            return (p.Nullable && IsValueType(p.Type)) ? p.Type + "?" : p.Type;
+        }
+
         public static string GetParamDecl(DbField p)
         {
             var deco = GetDirDecoration(p.Dir);
-            return (string.IsNullOrEmpty(deco) ? p.Type : deco + " " + p.Type) + " " + p.Name;
+            return (string.IsNullOrEmpty(deco) ? GetType(p) : deco + " " + GetType(p)) + " " + p.Name;
         }
 
         public static string GetMemberDecl(DbField p)
         {
-            if (p.Nullable && IsValueType(p.Type))
-                return p.Type + "? " + p.Name;
-            else
-                return p.Type + " " + p.Name;
+            return GetType(p) + " " + p.Name;
         }
     }
 }

@@ -28,8 +28,8 @@ namespace Sql
             public long o_bigint;
             public float o_real;
             public double o_float;
-            public Decimal o_money;
-            public Decimal o_decimal;
+            public decimal o_money;
+            public decimal o_decimal;
             public DateTime o_smalldatetime;
             public DateTime o_date;
             public DateTime o_datetime;
@@ -42,7 +42,7 @@ namespace Sql
             public Guid o_uniqueidentifier;
         }
 
-        public static async Task<Result> ExecuteAsync(IDbContext dc, bool i_bit, byte i_tinyint, short i_smallint, int i_int, long i_bigint, float i_real, double i_float, Decimal i_money, Decimal i_decimal, DateTime i_smalldatetime, DateTime i_date, DateTime i_datetime, DateTimeOffset i_datetimeoffset, TimeSpan i_time, string i_nchar, string i_nvarchar, byte[] i_binary, byte[] i_varbinary, Guid i_uniqueidentifier)
+        public static async Task<Result> ExecuteAsync(IDbContext dc, bool i_bit, byte i_tinyint, short i_smallint, int i_int, long i_bigint, float i_real, double i_float, decimal i_money, decimal i_decimal, DateTime i_smalldatetime, DateTime i_date, DateTime i_datetime, DateTimeOffset i_datetimeoffset, TimeSpan i_time, string i_nchar, string i_nvarchar, byte[] i_binary, byte[] i_varbinary, Guid i_uniqueidentifier)
         {
             var ctx = dc.CreateCommand();
             var cmd = ctx.Command;
@@ -97,8 +97,8 @@ namespace Sql
             r.o_bigint = (p23.Value is DBNull) ? 0L : (long)p23.Value;
             r.o_real = (p24.Value is DBNull) ? 0f : (float)p24.Value;
             r.o_float = (p25.Value is DBNull) ? 0.0 : (double)p25.Value;
-            r.o_money = (p26.Value is DBNull) ? 0M : (Decimal)p26.Value;
-            r.o_decimal = (p27.Value is DBNull) ? 0M : (Decimal)p27.Value;
+            r.o_money = (p26.Value is DBNull) ? 0M : (decimal)p26.Value;
+            r.o_decimal = (p27.Value is DBNull) ? 0M : (decimal)p27.Value;
             r.o_smalldatetime = (p28.Value is DBNull) ? DateTime.MinValue : (DateTime)p28.Value;
             r.o_date = (p29.Value is DBNull) ? DateTime.MinValue : (DateTime)p29.Value;
             r.o_datetime = (p30.Value is DBNull) ? DateTime.MinValue : (DateTime)p30.Value;
@@ -121,7 +121,7 @@ namespace Sql
             public DrEcho Rowset;
         }
 
-        public static async Task<Result> ExecuteAsync(IDbContext dc, bool i_bit, byte i_tinyint, short i_smallint, int i_int, long i_bigint, float i_real, double i_float, Decimal i_money, Decimal i_decimal, DateTime i_smalldatetime, DateTime i_date, DateTime i_datetime, DateTimeOffset i_datetimeoffset, TimeSpan i_time, string i_nchar, string i_nvarchar, byte[] i_binary, byte[] i_varbinary, Guid i_uniqueidentifier)
+        public static async Task<Result> ExecuteAsync(IDbContext dc, bool i_bit, byte i_tinyint, short i_smallint, int i_int, long i_bigint, float i_real, double i_float, decimal i_money, decimal i_decimal, DateTime i_smalldatetime, DateTime i_date, DateTime i_datetime, DateTimeOffset i_datetimeoffset, TimeSpan i_time, string i_nchar, string i_nvarchar, byte[] i_binary, byte[] i_varbinary, Guid i_uniqueidentifier)
         {
             var ctx = dc.CreateCommand();
             var cmd = ctx.Command;
@@ -150,6 +150,145 @@ namespace Sql
             var reader = await cmd.ExecuteReaderAsync();
             var r = new Result();
             r.Rowset = new DrEcho(reader);
+            ctx.OnExecuted();
+            return r;
+        }
+    }
+
+    public class EchoNullableParameters
+    {
+        public struct Result
+        {
+            public int AffectedRowCount;
+            public bool? o_bit;
+            public byte? o_tinyint;
+            public short? o_smallint;
+            public int? o_int;
+            public long? o_bigint;
+            public float? o_real;
+            public double? o_float;
+            public decimal? o_money;
+            public decimal? o_decimal;
+            public DateTime? o_smalldatetime;
+            public DateTime? o_date;
+            public DateTime? o_datetime;
+            public DateTimeOffset? o_datetimeoffset;
+            public TimeSpan? o_time;
+            public string o_nchar;
+            public string o_nvarchar;
+            public byte[] o_binary;
+            public byte[] o_varbinary;
+            public Guid? o_uniqueidentifier;
+        }
+
+        public static async Task<Result> ExecuteAsync(IDbContext dc, bool? i_bit, byte? i_tinyint, short? i_smallint, int? i_int, long? i_bigint, float? i_real, double? i_float, decimal? i_money, decimal? i_decimal, DateTime? i_smalldatetime, DateTime? i_date, DateTime? i_datetime, DateTimeOffset? i_datetimeoffset, TimeSpan? i_time, string i_nchar, string i_nvarchar, byte[] i_binary, byte[] i_varbinary, Guid? i_uniqueidentifier)
+        {
+            var ctx = dc.CreateCommand();
+            var cmd = ctx.Command;
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.CommandText = "EchoParameters";
+            cmd.AddParameter("@i_bit", i_bit);
+            cmd.AddParameter("@i_tinyint", i_tinyint);
+            cmd.AddParameter("@i_smallint", i_smallint);
+            cmd.AddParameter("@i_int", i_int);
+            cmd.AddParameter("@i_bigint", i_bigint);
+            cmd.AddParameter("@i_real", i_real);
+            cmd.AddParameter("@i_float", i_float);
+            cmd.AddParameter("@i_money", i_money);
+            cmd.AddParameter("@i_decimal", i_decimal);
+            cmd.AddParameter("@i_smalldatetime", i_smalldatetime);
+            cmd.AddParameter("@i_date", i_date);
+            cmd.AddParameter("@i_datetime", i_datetime);
+            cmd.AddParameter("@i_datetimeoffset", i_datetimeoffset);
+            cmd.AddParameter("@i_time", i_time);
+            cmd.AddParameter("@i_nchar", i_nchar);
+            cmd.AddParameter("@i_nvarchar", i_nvarchar);
+            cmd.AddParameter("@i_binary", i_binary);
+            cmd.AddParameter("@i_varbinary", i_varbinary);
+            cmd.AddParameter("@i_uniqueidentifier", i_uniqueidentifier);
+            var p19 = cmd.AddParameter("@o_bit", false, ParameterDirection.Output);
+            var p20 = cmd.AddParameter("@o_tinyint", (byte)0, ParameterDirection.Output);
+            var p21 = cmd.AddParameter("@o_smallint", (short)0, ParameterDirection.Output);
+            var p22 = cmd.AddParameter("@o_int", 0, ParameterDirection.Output);
+            var p23 = cmd.AddParameter("@o_bigint", 0L, ParameterDirection.Output);
+            var p24 = cmd.AddParameter("@o_real", 0f, ParameterDirection.Output);
+            var p25 = cmd.AddParameter("@o_float", 0.0, ParameterDirection.Output);
+            var p26 = cmd.AddParameter("@o_money", 0M, ParameterDirection.Output);
+            var p27 = cmd.AddParameter("@o_decimal", 0M, ParameterDirection.Output);
+            var p28 = cmd.AddParameter("@o_smalldatetime", DateTime.MinValue, ParameterDirection.Output);
+            var p29 = cmd.AddParameter("@o_date", DateTime.MinValue, ParameterDirection.Output);
+            var p30 = cmd.AddParameter("@o_datetime", DateTime.MinValue, ParameterDirection.Output);
+            var p31 = cmd.AddParameter("@o_datetimeoffset", DateTimeOffset.MinValue, ParameterDirection.Output);
+            var p32 = cmd.AddParameter("@o_time", TimeSpan.Zero, ParameterDirection.Output);
+            var p33 = cmd.AddParameter("@o_nchar", string.Empty, ParameterDirection.Output, 4);
+            var p34 = cmd.AddParameter("@o_nvarchar", string.Empty, ParameterDirection.Output, 4);
+            var p35 = cmd.AddParameter("@o_binary", new byte[0], ParameterDirection.Output, 4);
+            var p36 = cmd.AddParameter("@o_varbinary", new byte[0], ParameterDirection.Output, 4);
+            var p37 = cmd.AddParameter("@o_uniqueidentifier", Guid.Empty, ParameterDirection.Output);
+            ctx.OnExecuting();
+            var rowCount = await cmd.ExecuteNonQueryAsync();
+            var r = new Result();
+            r.AffectedRowCount = rowCount;
+            r.o_bit = (p19.Value is DBNull) ? (bool?)null : (bool)p19.Value;
+            r.o_tinyint = (p20.Value is DBNull) ? (byte?)null : (byte)p20.Value;
+            r.o_smallint = (p21.Value is DBNull) ? (short?)null : (short)p21.Value;
+            r.o_int = (p22.Value is DBNull) ? (int?)null : (int)p22.Value;
+            r.o_bigint = (p23.Value is DBNull) ? (long?)null : (long)p23.Value;
+            r.o_real = (p24.Value is DBNull) ? (float?)null : (float)p24.Value;
+            r.o_float = (p25.Value is DBNull) ? (double?)null : (double)p25.Value;
+            r.o_money = (p26.Value is DBNull) ? (decimal?)null : (decimal)p26.Value;
+            r.o_decimal = (p27.Value is DBNull) ? (decimal?)null : (decimal)p27.Value;
+            r.o_smalldatetime = (p28.Value is DBNull) ? (DateTime?)null : (DateTime)p28.Value;
+            r.o_date = (p29.Value is DBNull) ? (DateTime?)null : (DateTime)p29.Value;
+            r.o_datetime = (p30.Value is DBNull) ? (DateTime?)null : (DateTime)p30.Value;
+            r.o_datetimeoffset = (p31.Value is DBNull) ? (DateTimeOffset?)null : (DateTimeOffset)p31.Value;
+            r.o_time = (p32.Value is DBNull) ? (TimeSpan?)null : (TimeSpan)p32.Value;
+            r.o_nchar = (p33.Value is DBNull) ? (string)null : (string)p33.Value;
+            r.o_nvarchar = (p34.Value is DBNull) ? (string)null : (string)p34.Value;
+            r.o_binary = (p35.Value is DBNull) ? (byte[])null : (byte[])p35.Value;
+            r.o_varbinary = (p36.Value is DBNull) ? (byte[])null : (byte[])p36.Value;
+            r.o_uniqueidentifier = (p37.Value is DBNull) ? (Guid?)null : (Guid)p37.Value;
+            ctx.OnExecuted();
+            return r;
+        }
+    }
+
+    public class EchoNullableParametersAsRowset
+    {
+        public struct Result
+        {
+            public DrNullableEcho Rowset;
+        }
+
+        public static async Task<Result> ExecuteAsync(IDbContext dc, bool? i_bit, byte? i_tinyint, short? i_smallint, int? i_int, long? i_bigint, float? i_real, double? i_float, decimal? i_money, decimal? i_decimal, DateTime? i_smalldatetime, DateTime? i_date, DateTime? i_datetime, DateTimeOffset? i_datetimeoffset, TimeSpan? i_time, string i_nchar, string i_nvarchar, byte[] i_binary, byte[] i_varbinary, Guid? i_uniqueidentifier)
+        {
+            var ctx = dc.CreateCommand();
+            var cmd = ctx.Command;
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.CommandText = "EchoParametersAsRowset";
+            cmd.AddParameter("@i_bit", i_bit);
+            cmd.AddParameter("@i_tinyint", i_tinyint);
+            cmd.AddParameter("@i_smallint", i_smallint);
+            cmd.AddParameter("@i_int", i_int);
+            cmd.AddParameter("@i_bigint", i_bigint);
+            cmd.AddParameter("@i_real", i_real);
+            cmd.AddParameter("@i_float", i_float);
+            cmd.AddParameter("@i_money", i_money);
+            cmd.AddParameter("@i_decimal", i_decimal);
+            cmd.AddParameter("@i_smalldatetime", i_smalldatetime);
+            cmd.AddParameter("@i_date", i_date);
+            cmd.AddParameter("@i_datetime", i_datetime);
+            cmd.AddParameter("@i_datetimeoffset", i_datetimeoffset);
+            cmd.AddParameter("@i_time", i_time);
+            cmd.AddParameter("@i_nchar", i_nchar);
+            cmd.AddParameter("@i_nvarchar", i_nvarchar);
+            cmd.AddParameter("@i_binary", i_binary);
+            cmd.AddParameter("@i_varbinary", i_varbinary);
+            cmd.AddParameter("@i_uniqueidentifier", i_uniqueidentifier);
+            ctx.OnExecuting();
+            var reader = await cmd.ExecuteReaderAsync();
+            var r = new Result();
+            r.Rowset = new DrNullableEcho(reader);
             ctx.OnExecuted();
             return r;
         }
@@ -380,13 +519,40 @@ namespace Sql
             cmd.AddParameter("@value1", value1);
             cmd.AddParameter("@value2", value2);
             var p2 = cmd.AddParameter("@answer", 0, ParameterDirection.Output);
-            var pr = cmd.AddParameter(null, null, ParameterDirection.ReturnValue);
+            var pr = cmd.AddParameter(null, 0, ParameterDirection.ReturnValue);
             ctx.OnExecuting();
             var rowCount = await cmd.ExecuteNonQueryAsync();
             var r = new Result();
             r.AffectedRowCount = rowCount;
             r.answer = (p2.Value is DBNull) ? 0 : (int)p2.Value;
             r.Return = (int)pr.Value;
+            ctx.OnExecuted();
+            return r;
+        }
+    }
+
+    public class SumNullableInt
+    {
+        public struct Result
+        {
+            public int AffectedRowCount;
+            public int? answer;
+        }
+
+        public static async Task<Result> ExecuteAsync(IDbContext dc, int? value1, int? value2)
+        {
+            var ctx = dc.CreateCommand();
+            var cmd = ctx.Command;
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.CommandText = "SumNullableInt";
+            cmd.AddParameter("@value1", value1);
+            cmd.AddParameter("@value2", value2);
+            var p2 = cmd.AddParameter("@answer", 0, ParameterDirection.Output);
+            ctx.OnExecuting();
+            var rowCount = await cmd.ExecuteNonQueryAsync();
+            var r = new Result();
+            r.AffectedRowCount = rowCount;
+            r.answer = (p2.Value is DBNull) ? (int?)null : (int)p2.Value;
             ctx.OnExecuted();
             return r;
         }
@@ -410,8 +576,8 @@ namespace Sql
             public long o_bigint;
             public float o_real;
             public double o_float;
-            public Decimal o_money;
-            public Decimal o_decimal;
+            public decimal o_money;
+            public decimal o_decimal;
             public DateTime o_smalldatetime;
             public DateTime o_date;
             public DateTime o_datetime;
@@ -443,9 +609,9 @@ namespace Sql
             var v6 = _reader.GetValue(6);
             r.o_float = (v6 is DBNull) ? 0.0 : (double)v6;
             var v7 = _reader.GetValue(7);
-            r.o_money = (v7 is DBNull) ? 0M : (Decimal)v7;
+            r.o_money = (v7 is DBNull) ? 0M : (decimal)v7;
             var v8 = _reader.GetValue(8);
-            r.o_decimal = (v8 is DBNull) ? 0M : (Decimal)v8;
+            r.o_decimal = (v8 is DBNull) ? 0M : (decimal)v8;
             var v9 = _reader.GetValue(9);
             r.o_smalldatetime = (v9 is DBNull) ? DateTime.MinValue : (DateTime)v9;
             var v10 = _reader.GetValue(10);
@@ -466,6 +632,115 @@ namespace Sql
             r.o_varbinary = (v17 is DBNull) ? new byte[0] : (byte[])v17;
             var v18 = _reader.GetValue(18);
             r.o_uniqueidentifier = (v18 is DBNull) ? Guid.Empty : (Guid)v18;
+            return r;
+        }
+
+        public async Task<List<Row>> FetchAllRowsAndDisposeAsync()
+        {
+            var rows = new List<Row>();
+            while (true)
+            {
+                var row = await NextAsync();
+                if (row == null) break;
+                rows.Add(row);
+            }
+            Dispose();
+            return rows;
+        }
+
+        public async Task<List<T>> FetchAllRowsAndDisposeAsync<T>(Func<Row, T> selector)
+        {
+            var rows = new List<T>();
+            while (true)
+            {
+                var row = await NextAsync();
+                if (row == null) break;
+                rows.Add(selector(row));
+            }
+            Dispose();
+            return rows;
+        }
+
+        public void Dispose()
+        {
+            _reader.Dispose();
+        }
+    }
+
+    public class DrNullableEcho : IDisposable
+    {
+        private DbDataReader _reader;
+
+        public DrNullableEcho(DbDataReader reader)
+        {
+            _reader = reader;
+        }
+
+        public class Row
+        {
+            public bool? o_bit;
+            public byte? o_tinyint;
+            public short? o_smallint;
+            public int? o_int;
+            public long? o_bigint;
+            public float? o_real;
+            public double? o_float;
+            public decimal? o_money;
+            public decimal? o_decimal;
+            public DateTime? o_smalldatetime;
+            public DateTime? o_date;
+            public DateTime? o_datetime;
+            public DateTimeOffset? o_datetimeoffset;
+            public TimeSpan? o_time;
+            public string o_nchar;
+            public string o_nvarchar;
+            public byte[] o_binary;
+            public byte[] o_varbinary;
+            public Guid? o_uniqueidentifier;
+        }
+
+        public async Task<Row> NextAsync()
+        {
+            if (await _reader.ReadAsync() == false) return null;
+            var r = new Row();
+            var v0 = _reader.GetValue(0);
+            r.o_bit = (v0 is DBNull) ? (bool?)null : (bool)v0;
+            var v1 = _reader.GetValue(1);
+            r.o_tinyint = (v1 is DBNull) ? (byte?)null : (byte)v1;
+            var v2 = _reader.GetValue(2);
+            r.o_smallint = (v2 is DBNull) ? (short?)null : (short)v2;
+            var v3 = _reader.GetValue(3);
+            r.o_int = (v3 is DBNull) ? (int?)null : (int)v3;
+            var v4 = _reader.GetValue(4);
+            r.o_bigint = (v4 is DBNull) ? (long?)null : (long)v4;
+            var v5 = _reader.GetValue(5);
+            r.o_real = (v5 is DBNull) ? (float?)null : (float)v5;
+            var v6 = _reader.GetValue(6);
+            r.o_float = (v6 is DBNull) ? (double?)null : (double)v6;
+            var v7 = _reader.GetValue(7);
+            r.o_money = (v7 is DBNull) ? (decimal?)null : (decimal)v7;
+            var v8 = _reader.GetValue(8);
+            r.o_decimal = (v8 is DBNull) ? (decimal?)null : (decimal)v8;
+            var v9 = _reader.GetValue(9);
+            r.o_smalldatetime = (v9 is DBNull) ? (DateTime?)null : (DateTime)v9;
+            var v10 = _reader.GetValue(10);
+            r.o_date = (v10 is DBNull) ? (DateTime?)null : (DateTime)v10;
+            var v11 = _reader.GetValue(11);
+            r.o_datetime = (v11 is DBNull) ? (DateTime?)null : (DateTime)v11;
+            var v12 = _reader.GetValue(12);
+            r.o_datetimeoffset = (v12 is DBNull) ? (DateTimeOffset?)null : (DateTimeOffset)v12;
+            var v13 = _reader.GetValue(13);
+            r.o_time = (v13 is DBNull) ? (TimeSpan?)null : (TimeSpan)v13;
+            var v14 = _reader.GetValue(14);
+            r.o_nchar = (v14 is DBNull) ? (string)null : (string)v14;
+            var v15 = _reader.GetValue(15);
+            r.o_nvarchar = (v15 is DBNull) ? (string)null : (string)v15;
+            var v16 = _reader.GetValue(16);
+            r.o_binary = (v16 is DBNull) ? (byte[])null : (byte[])v16;
+            var v17 = _reader.GetValue(17);
+            r.o_varbinary = (v17 is DBNull) ? (byte[])null : (byte[])v17;
+            var v18 = _reader.GetValue(18);
+            r.o_uniqueidentifier = (v18 is DBNull) ? (Guid?)null : (Guid)v18;
             return r;
         }
 

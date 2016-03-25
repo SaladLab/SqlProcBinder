@@ -2,6 +2,8 @@
   "Procs": [
     { "Path": "EchoParameters.sql" },
     { "Path": "EchoParametersAsRowset.sql", "Rowset": "DrEcho" },
+    { "Path": "EchoParameters.sql", "ClassName": "EchoNullableParameters", "Nullable": true },
+    { "Path": "EchoParametersAsRowset.sql", "ClassName": "EchoNullableParametersAsRowset", "Nullable": true, "Rowset": "DrNullableEcho" },
     { "Path": "GenerateInt.sql", "Rowset": "DrInt" },
     { "Path": "GenerateInt.sql", "ClassName": "GenerateIntByRowset", "Rowset": "DbDataReader" },
     { "Path": "GenerateIntWithOutput.sql", "Rowset": "DrInt", "RowsetFetch": true },
@@ -11,7 +13,8 @@
     { "Path": "GenerateNullableString.sql", "ClassName": "GenerateCoalescedString", "Rowset": "DrString" },
     { "Path": "RaiseError.sql" },
     { "Path": "SumInt.sql" },
-    { "Path": "SumIntWithReturn.sql", "Return": true }
+    { "Path": "SumIntWithReturn.sql", "Return": true },
+    { "Path": "SumNullableInt.sql", "Nullable": true }
   ],
   "Rowsets": [
     {
@@ -24,8 +27,8 @@
         "long o_bigint",
         "float o_real",
         "double o_float",
-        "Decimal o_money",
-        "Decimal o_decimal",
+        "decimal o_money",
+        "decimal o_decimal",
         "DateTime o_smalldatetime",
         "DateTime o_date",
         "DateTime o_datetime",
@@ -36,6 +39,30 @@
         "byte[] o_binary",
         "byte[] o_varbinary",
         "Guid o_uniqueidentifier"
+      ]
+    },
+    {
+      "Name": "DrNullableEcho",
+      "Fields": [
+        "bool? o_bit",
+        "byte? o_tinyint",
+        "short? o_smallint",
+        "int? o_int",
+        "long? o_bigint",
+        "float? o_real",
+        "double? o_float",
+        "decimal? o_money",
+        "decimal? o_decimal",
+        "DateTime? o_smalldatetime",
+        "DateTime? o_date",
+        "DateTime? o_datetime",
+        "DateTimeOffset? o_datetimeoffset",
+        "TimeSpan? o_time",
+        "string? o_nchar",
+        "string? o_nvarchar",
+        "byte[]? o_binary",
+        "byte[]? o_varbinary",
+        "Guid? o_uniqueidentifier"
       ]
     },
     {

@@ -102,6 +102,7 @@ namespace CodeGenerator
             public string ClassName;
             public string Path;
             public string Source;
+            public bool Nullable;
             public bool Return;
             public string Rowset;
             public bool RowsetFetch;
@@ -140,6 +141,11 @@ namespace CodeGenerator
                         d.Return = jproc.Return;
                         d.Rowset = jproc.Rowset;
                         d.RowsetFetch = jproc.RowsetFetch;
+
+                        if (jproc.Nullable)
+                        {
+                            d.Params.ForEach(p => p.Nullable = true);
+                        }
                     });
                     procs.AddRange(decls);
                 }
@@ -224,7 +230,6 @@ namespace CodeGenerator
                 "// </auto-generated>",
                 "// ------------------------------------------------------------------------------",
                 "");
-
 
             w._("using System;",
                 "using System.Collections.Generic;",
