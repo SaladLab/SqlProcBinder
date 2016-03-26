@@ -27,7 +27,7 @@ With this generated class, it becomes easy to call stored procedures from C#.
 
 ```csharp
 var r = await Sum.ExecuteAsync(dc, 1, 2);
-Console.WriteLine(r.ans); // = 3
+Console.WriteLine(r.ans); // 3
 ```
 
 ## Where can I get it?
@@ -66,7 +66,7 @@ And make sure that SqlProcBinder package is also installed.
 
 ```csharp
 var r = await Sum.ExecuteAsync(dc, 1, 2);
-Console.WriteLine(r.ans); // = 3
+Console.WriteLine(r.ans); // 3
 ```
 
 `dc` is an instance of `IDbContext` type. It is simply ok with creating `SimpleDbContext` and passing it.
@@ -219,4 +219,62 @@ With typed rowset, you can use it as `List<Row>`.
 var ret = await GenerateInt.ExecuteAsync(dc, 10);
 foreach (var row in await ret.Rowset.FetchAllRowsAndDisposeAsync())
     Console.WriteLine(row.Value); // 1 2 3 ... 10
+```
+
+#### Return Rowset as List\<Row\>
+
+If you want to use typed rowset more simply, `RowsetFetch` can be an option.
+```json
+{ "Path": "GenerateInt.sql", "Rowset": "DbDataReader", "RowsetFetch": true }
+```
+
+Returned `Rows` is List<Row>.
+```csharp
+var ret = await GenerateInt.ExecuteAsync(dc, 10);
+foreach (var row in ret.Rows) // Rows is type of List<Row>
+    Console.WriteLine(row.Value); // 1 2 3 ... 10
+}
+```
+
+#### User Table Type
+
+MSSQL provides a way passing table data to stored procedures.
+```sql
+CREATE TYPE [dbo].[Vector3List] AS TABLE(
+    [X] [float] NOT NULL,
+    [Y] [float] NOT NULL,
+    [Z] [float] NOT NULL
+)
+
+CREATE PROCEDURE [dbo].[Vector3ListSum]
+    @values Vector3List READONLY,
+    @ans float OUTPUT
+AS
+BEGIN
+    SELECT @ans = SUM(X) + SUM(Y) + SUM(Z) FROM @values
+END
+```
+
+Instance of `DataTable` is used for passing data. For type-safety, table-type
+class can be generated.
+```json
+"TableTypes": [ { "Path": "Vector3List.sql" } ]
+```
+
+Previous option generates `Vector3List` class.
+```csharp
+public class Vector3List {
+    public DataTable Table { get; set; }
+    public void Add(double X, double Y, double Z) { ... }
+}
+```
+
+With generated `Vector3List`, table data can be passed to stored procedures safely.
+```csharp
+var list = new Sql.Vector3List();
+list.Add(1, 2, 3);
+list.Add(4, 5, 6);
+
+var ret = await Vector3ListSum.ExecuteAsync(_db.DbContext, list.Table);
+Console.WriteLine(ret.ans); // 21
 ```
