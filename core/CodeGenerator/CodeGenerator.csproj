@@ -61,6 +61,9 @@
     <Compile Include="DbRowsetCodeGenerator.cs" />
     <Compile Include="DbRowsetDeclaration.cs" />
     <Compile Include="DbTypeHelper.cs" />
+    <Compile Include="DbTableTypeCodeGenerator.cs" />
+    <Compile Include="DbTableTypeDeclaration.cs" />
+    <Compile Include="DbTableTypeParser.cs" />
     <Compile Include="Options.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

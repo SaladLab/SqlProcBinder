@@ -35,10 +35,16 @@ namespace CodeGenerator
                     var paramName = parameters[0];
                     var paramType = parameters[1];
                     var paramOutput = (parameters.Length >= 3 && parameters[2].ToLower() == "output");
+                    var paramReadonly = (parameters.Length >= 3 && parameters[2].ToLower() == "readonly");
 
                     var type = DbTypeHelper.GetTypeFromSqlType(paramType);
                     if (type == null)
-                        throw new Exception("Cannot resolve type: " + paramType);
+                    {
+                        if (paramReadonly)
+                            type = Tuple.Create("DataTable", 0);
+                        else
+                            throw new Exception("Cannot resolve type: " + paramType);
+                    }
 
                     decl.Params.Add(new DbField
                     {

@@ -58,17 +58,18 @@ namespace CodeGenerator
 
             var procs = new List<DbProcDeclaration>();
             var rowsets = new List<DbRowsetDeclaration>();
+            var tableTypes = new List<DbTableTypeDeclaration>();
 
             foreach (var sourceFile in options.Sources)
             {
-                ReadSource(sourceFile, procs, rowsets);
+                ReadSource(sourceFile, procs, rowsets, tableTypes);
             }
 
             foreach (var optionFile in options.OptionFiles)
             {
                 try
                 {
-                    ReadOption(optionFile, procs, rowsets);
+                    ReadOption(optionFile, procs, rowsets, tableTypes);
                 }
                 catch (Exception e)
                 {
@@ -77,14 +78,15 @@ namespace CodeGenerator
                 }
             }
 
-            MakeClassName(options, procs, rowsets);
+            MakeClassName(options, procs, rowsets, tableTypes);
 
-            return Process(options, procs, rowsets);
+            return Process(options, procs, rowsets, tableTypes);
         }
 
         private static void ReadSource(string sourceFile,
                                        List<DbProcDeclaration> procs,
-                                       List<DbRowsetDeclaration> rowsets)
+                                       List<DbRowsetDeclaration> rowsets,
+                                       List<DbTableTypeDeclaration> tableTypes)
         {
             var parser = new DbProcParser();
             var decls = parser.Parse(File.ReadAllText(sourceFile));
@@ -95,6 +97,7 @@ namespace CodeGenerator
         {
             public JsonProc[] Procs;
             public JsonRowset[] Rowsets;
+            public JsonTableType[] TableTypes;
         }
 
         public class JsonProc
@@ -114,9 +117,17 @@ namespace CodeGenerator
             public string[] Fields;
         }
 
+        public class JsonTableType
+        {
+            public string ClassName;
+            public string Path;
+            public string Source;
+        }
+
         private static void ReadOption(string optionFile,
                                        List<DbProcDeclaration> procs,
-                                       List<DbRowsetDeclaration> rowsets)
+                                       List<DbRowsetDeclaration> rowsets,
+                                       List<DbTableTypeDeclaration> tableTypes)
         {
             var joption = JsonConvert.DeserializeObject<JsonOption>(File.ReadAllText(optionFile));
             var baseDir = Path.GetDirectoryName(optionFile);
@@ -181,10 +192,34 @@ namespace CodeGenerator
                     rowsets.Add(rowset);
                 }
             }
+
+            if (joption.TableTypes != null)
+            {
+                var parser = new DbTableTypeParser();
+                foreach (var jtype in joption.TableTypes)
+                {
+                    List<DbTableTypeDeclaration> decls;
+
+                    if (string.IsNullOrEmpty(jtype.Path) == false)
+                        decls = parser.Parse(File.ReadAllText(Path.Combine(baseDir, jtype.Path)));
+                    else if (string.IsNullOrEmpty(jtype.Source) == false)
+                        decls = parser.Parse(jtype.Source);
+                    else
+                        throw new ArgumentException("Path or Source is required: " + jtype);
+
+                    decls.ForEach(d =>
+                    {
+                        d.ClassName = jtype.ClassName;
+                    });
+                    tableTypes.AddRange(decls);
+                }
+            }
         }
 
-        private static void MakeClassName(Options options, IList<DbProcDeclaration> procs,
-                                          IList<DbRowsetDeclaration> rowsets)
+        private static void MakeClassName(Options options,
+                                          IList<DbProcDeclaration> procs,
+                                          IList<DbRowsetDeclaration> rowsets,
+                                          IList<DbTableTypeDeclaration> tableTypes)
         {
             foreach (var proc in procs.Where(p => string.IsNullOrEmpty(p.ClassName)))
             {
@@ -192,6 +227,14 @@ namespace CodeGenerator
 
                 if (options.Patterns != null)
                     proc.ClassName = ReplaceName(options.Patterns, proc.ProcName);
+            }
+
+            foreach (var tableType in tableTypes.Where(p => string.IsNullOrEmpty(p.ClassName)))
+            {
+                tableType.ClassName = tableType.TypeName;
+
+                if (options.Patterns != null)
+                    tableType.ClassName = ReplaceName(options.Patterns, tableType.TypeName);
             }
         }
 
@@ -210,7 +253,10 @@ namespace CodeGenerator
             return name;
         }
 
-        private static int Process(Options options, IList<DbProcDeclaration> procs, IList<DbRowsetDeclaration> rowsets)
+        private static int Process(Options options,
+                                   IList<DbProcDeclaration> procs,
+                                   IList<DbRowsetDeclaration> rowsets,
+                                   IList<DbTableTypeDeclaration> tableTypes)
         {
             // Generate code
 
@@ -221,7 +267,9 @@ namespace CodeGenerator
 
             var w = new CodeWriter.CodeWriter(settings);
 
-            w._("// ------------------------------------------------------------------------------",
+            w.HeadLines = new[]
+            {
+                "// ------------------------------------------------------------------------------",
                 "// <auto-generated>",
                 "//     This code was generated by SqlProcBinder.CodeGenerator.",
                 "//",
@@ -229,15 +277,16 @@ namespace CodeGenerator
                 "//     the code is regenerated.",
                 "// </auto-generated>",
                 "// ------------------------------------------------------------------------------",
-                "");
+                "",
 
-            w._("using System;",
+                "using System;",
                 "using System.Collections.Generic;",
                 "using System.Data;",
                 "using System.Data.Common;",
                 "using System.Threading.Tasks;",
                 "using SqlProcBinder;",
-                "");
+                ""
+            };
 
             UsingHandle namespaceHandle = null;
             if (string.IsNullOrEmpty(options.Namespace) == false)
@@ -253,6 +302,12 @@ namespace CodeGenerator
             foreach (var rowset in rowsets)
             {
                 rowsetCodeGen.Generate(rowset, w);
+            }
+
+            var tableTypeCodeGen = new DbTableTypeCodeGenerator();
+            foreach (var tableType in tableTypes)
+            {
+                tableTypeCodeGen.Generate(tableType, w);
             }
 
             if (namespaceHandle != null)

@@ -324,5 +324,16 @@ namespace CodeGenerator.Tests
             Assert.Equal(row.o_varbinary, Encoding.UTF8.GetBytes("TEXT"));
             Assert.Equal(row.o_uniqueidentifier, new Guid(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1));
         }
+
+        [Fact]
+        private async Task Execute_TableType_Succeeded()
+        {
+            var list = new Sql.Vector3List();
+            list.Add(1, 2, 3);
+            list.Add(4, 5, 6);
+
+            var ret = await Sql.Vector3ListSum.ExecuteAsync(_db.DbContext, list.Table);
+            Assert.Equal(21, ret.answer);
+        }
     }
 }

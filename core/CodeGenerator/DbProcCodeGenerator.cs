@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using CodeWriter;
+using System;
 
 namespace CodeGenerator
 {
@@ -65,7 +66,9 @@ namespace CodeGenerator
                     {
                         if (p.Type == "DataTable")
                         {
-                            w._($"cmd.AddParameter(`@{p.Name}`, {p.Name}).SqlDbType = SqlDbType.Structured;");
+                            EnsureUsingSqlClient(w);
+                            w._($"((SqlCommand)cmd).Parameters.AddWithValue(`@{p.Name}`, {p.Name})" +
+                                $".SqlDbType = SqlDbType.Structured;");
                         }
                         else
                         {
@@ -140,6 +143,19 @@ namespace CodeGenerator
                 w._($"ctx.OnExecuted();");
                 w._($"return r;");
             }
+        }
+
+        private void EnsureUsingSqlClient(CodeWriter.CodeWriter w)
+        {
+            var line = "using System.Data.SqlClient;";
+            if (w.HeadLines.Contains(line))
+                return;
+
+            var idx = Array.FindLastIndex(w.HeadLines, l => l.StartsWith("using System.Data."));
+
+            var lineList = w.HeadLines.ToList();
+            lineList.Insert(idx + 1, line);
+            w.HeadLines = lineList.ToArray();
         }
     }
 }

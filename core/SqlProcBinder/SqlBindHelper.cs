@@ -6,6 +6,34 @@ namespace SqlProcBinder
 {
     public static class SqlBindHelper
     {
+        public static DbParameter AddParameter(this DbCommand command,
+                                               string parameterName, DbType type)
+        {
+            var p = command.CreateParameter();
+            p.ParameterName = parameterName;
+            p.DbType = type;
+            command.Parameters.Add(p);
+            return p;
+        }
+
+        public static DbParameter AddParameter(this DbCommand command,
+                                               string parameterName, DbType type,
+                                               ParameterDirection direction)
+        {
+            var p = AddParameter(command, parameterName, type);
+            p.Direction = direction;
+            return p;
+        }
+
+        public static DbParameter AddParameter(this DbCommand command,
+                                               string parameterName, DbType type,
+                                               ParameterDirection direction, int size)
+        {
+            var p = AddParameter(command, parameterName, type, direction);
+            p.Size = size;
+            return p;
+        }
+
         public static DbParameter AddParameter<T>(this DbCommand command,
                                                   string parameterName, T value)
         {

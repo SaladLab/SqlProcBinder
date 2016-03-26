@@ -43,17 +43,38 @@ namespace CodeGenerator.Tests
                 var filePath = Path.Combine(dir, _command.CommandText + ".sql");
                 if (File.Exists(filePath))
                 {
-                    var dropCommand = _connection.CreateCommand();
-                    dropCommand.CommandText = string.Format(
-                        "IF EXISTS (SELECT * FROM sys.objects WHERE type = 'P' AND name = '{0}') DROP PROCEDURE {0};",
-                        _command.CommandText);
-                    dropCommand.ExecuteNonQuery();
+                    if (_command.CommandText.StartsWith("Vector3List"))
+                        EnsureTableType("Vector3List", Path.Combine(dir, "Vector3List.sql"));
 
-                    var createCommand = _connection.CreateCommand();
-                    createCommand.CommandText = File.ReadAllText(filePath);
-                    createCommand.ExecuteNonQuery();
+                    RecreateStoredProcedure(_command.CommandText, filePath);
                 }
             }
+        }
+
+        private void EnsureTableType(string typeName, string filePath)
+        {
+            var checkCommand = _connection.CreateCommand();
+            checkCommand.CommandText = $"SELECT COUNT(*) FROM sys.table_types WHERE name = '{typeName}'";
+            var count = (int)checkCommand.ExecuteScalar();
+            if (count <= 0)
+            {
+                var createCommand = _connection.CreateCommand();
+                createCommand.CommandText = File.ReadAllText(filePath);
+                createCommand.ExecuteNonQuery();
+            }
+        }
+
+        private void RecreateStoredProcedure(string procName, string filePath)
+        {
+            var dropCommand = _connection.CreateCommand();
+            dropCommand.CommandText = string.Format(
+                "IF EXISTS (SELECT * FROM sys.objects WHERE type = 'P' AND name = '{0}') DROP PROCEDURE {0};",
+                procName);
+            dropCommand.ExecuteNonQuery();
+
+            var createCommand = _connection.CreateCommand();
+            createCommand.CommandText = File.ReadAllText(filePath);
+            createCommand.ExecuteNonQuery();
         }
 
         public void OnExecuted()

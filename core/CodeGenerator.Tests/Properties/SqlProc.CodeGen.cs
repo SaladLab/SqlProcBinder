@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
+using System.Data.SqlClient;
 using System.Threading.Tasks;
 using SqlProcBinder;
 
@@ -558,6 +559,32 @@ namespace Sql
         }
     }
 
+    public class Vector3ListSum
+    {
+        public struct Result
+        {
+            public int AffectedRowCount;
+            public double answer;
+        }
+
+        public static async Task<Result> ExecuteAsync(IDbContext dc, DataTable values)
+        {
+            var ctx = dc.CreateCommand();
+            var cmd = ctx.Command;
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.CommandText = "Vector3ListSum";
+            ((SqlCommand)cmd).Parameters.AddWithValue("@values", values).SqlDbType = SqlDbType.Structured;
+            var p1 = cmd.AddParameter("@answer", 0.0, ParameterDirection.Output);
+            ctx.OnExecuting();
+            var rowCount = await cmd.ExecuteNonQueryAsync();
+            var r = new Result();
+            r.AffectedRowCount = rowCount;
+            r.answer = (p1.Value is DBNull) ? 0.0 : (double)p1.Value;
+            ctx.OnExecuted();
+            return r;
+        }
+    }
+
     public class DrEcho : IDisposable
     {
         private DbDataReader _reader;
@@ -993,6 +1020,24 @@ namespace Sql
         public void Dispose()
         {
             _reader.Dispose();
+        }
+    }
+
+    public class Vector3List
+    {
+        public DataTable Table { get; set; }
+
+        public Vector3List()
+        {
+            Table = new DataTable();
+            Table.Columns.Add("X", typeof(double));
+            Table.Columns.Add("Y", typeof(double));
+            Table.Columns.Add("Z", typeof(double));
+        }
+
+        public void Add(double X, double Y, double Z)
+        {
+            Table.Rows.Add(X, Y, Z);
         }
     }
 }

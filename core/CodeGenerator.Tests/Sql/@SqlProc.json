@@ -14,7 +14,8 @@
     { "Path": "RaiseError.sql" },
     { "Path": "SumInt.sql" },
     { "Path": "SumIntWithReturn.sql", "Return": true },
-    { "Path": "SumNullableInt.sql", "Nullable": true }
+    { "Path": "SumNullableInt.sql", "Nullable": true },
+    { "Path": "Vector3ListSum.sql" }
   ],
   "Rowsets": [
     {
@@ -89,5 +90,8 @@
         "string? Value"
       ]
     }
+  ],
+  "TableTypes": [
+    { "Path": "Vector3List.sql" }
   ]
 }
