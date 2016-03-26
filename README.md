@@ -228,7 +228,7 @@ If you want to use typed rowset more simply, `RowsetFetch` can be an option.
 { "Path": "GenerateInt.sql", "Rowset": "DbDataReader", "RowsetFetch": true }
 ```
 
-Returned `Rows` is List<Row>.
+Returned `Rows` is List\<Row\> which is a way easier to use.
 ```csharp
 var ret = await GenerateInt.ExecuteAsync(dc, 10);
 foreach (var row in ret.Rows) // Rows is type of List<Row>
