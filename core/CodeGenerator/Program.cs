@@ -62,14 +62,14 @@ namespace CodeGenerator
 
             foreach (var sourceFile in options.Sources)
             {
-                ReadSource(sourceFile, procs, rowsets, tableTypes);
+                ReadSource(sourceFile, options, procs, rowsets, tableTypes);
             }
 
             foreach (var optionFile in options.OptionFiles)
             {
                 try
                 {
-                    ReadOption(optionFile, procs, rowsets, tableTypes);
+                    ReadOption(optionFile, options, procs, rowsets, tableTypes);
                 }
                 catch (Exception e)
                 {
@@ -84,12 +84,19 @@ namespace CodeGenerator
         }
 
         private static void ReadSource(string sourceFile,
+                                       Options options,
                                        List<DbProcDeclaration> procs,
                                        List<DbRowsetDeclaration> rowsets,
                                        List<DbTableTypeDeclaration> tableTypes)
         {
             var parser = new DbProcParser();
             var decls = parser.Parse(File.ReadAllText(sourceFile));
+
+            decls.ForEach(d =>
+            {
+                d.Params.ForEach(p => p.Nullable = options.Nullable);
+            });
+
             procs.AddRange(decls);
         }
 
@@ -105,7 +112,7 @@ namespace CodeGenerator
             public string ClassName;
             public string Path;
             public string Source;
-            public bool Nullable;
+            public bool? Nullable;
             public bool Return;
             public string Rowset;
             public bool RowsetFetch;
@@ -125,6 +132,7 @@ namespace CodeGenerator
         }
 
         private static void ReadOption(string optionFile,
+                                       Options options,
                                        List<DbProcDeclaration> procs,
                                        List<DbRowsetDeclaration> rowsets,
                                        List<DbTableTypeDeclaration> tableTypes)
@@ -152,11 +160,7 @@ namespace CodeGenerator
                         d.Return = jproc.Return;
                         d.Rowset = jproc.Rowset;
                         d.RowsetFetch = jproc.RowsetFetch;
-
-                        if (jproc.Nullable)
-                        {
-                            d.Params.ForEach(p => p.Nullable = true);
-                        }
+                        d.Params.ForEach(p => p.Nullable = jproc.Nullable ?? options.Nullable);
                     });
                     procs.AddRange(decls);
                 }

@@ -24,5 +24,9 @@ namespace CodeGenerator
         [Option('n', "namespace",
             HelpText = "Namespace that generated source has.")]
         public string Namespace { get; set; }
+
+        [Option('l', "nullable",
+            HelpText = "Set procedure parameter nullable by default.")]
+        public bool Nullable { get; set; }
     }
 }
