@@ -1,3 +1,8 @@
+## 1.1.0 (Released 2016/03/26)
+
+* Add table-type support
+* Add nullable option
+
 ## 1.0.0 (Released 2016/03/25)
 
 * Add nullable type support
