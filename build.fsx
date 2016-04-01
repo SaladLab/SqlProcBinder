@@ -8,9 +8,12 @@ open BuildLib
 
 let solution = 
     initSolution
-        "./CodeWriter.sln" "Release" 
-        [ { emptyProject with Name = "CodeWriter" 
-                              Folder = "./core/CodeWriter" } ]
+        "./SqlProcBinder.sln" "Release" 
+        [{ emptyProject with Name = "SqlProcBinder"
+                             Folder = "./core/SqlProcBinder" }
+         { emptyProject with Name = "SqlProcBinder.CodeGenerator"
+                             Folder = "./core/CodeGenerator"
+                             Executable = true }]
 
 Target "Clean" <| fun _ -> cleanBin
 
