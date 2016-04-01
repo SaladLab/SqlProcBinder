@@ -5,13 +5,13 @@ VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{9757EF77-3DCC-4AC1-B5BC-4732248E363B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SqlProcBinder", "Core\SqlProcBinder\SqlProcBinder.csproj", "{4CB74471-0145-4644-A81F-D860B94D2126}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SqlProcBinder", "core\SqlProcBinder\SqlProcBinder.csproj", "{4CB74471-0145-4644-A81F-D860B94D2126}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SqlProcBinder.Tests", "Core\SqlProcBinder.Tests\SqlProcBinder.Tests.csproj", "{50C297E5-21E3-45A4-B63A-22C52C8B7339}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SqlProcBinder.Tests", "core\SqlProcBinder.Tests\SqlProcBinder.Tests.csproj", "{50C297E5-21E3-45A4-B63A-22C52C8B7339}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeGenerator", "Core\CodeGenerator\CodeGenerator.csproj", "{917B04F2-90F7-4436-B06B-9702D9746FF8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeGenerator", "core\CodeGenerator\CodeGenerator.csproj", "{917B04F2-90F7-4436-B06B-9702D9746FF8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeGenerator.Tests", "Core\CodeGenerator.Tests\CodeGenerator.Tests.csproj", "{62F67284-4D02-4AB0-A1C2-6988A8B7D65D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeGenerator.Tests", "core\CodeGenerator.Tests\CodeGenerator.Tests.csproj", "{62F67284-4D02-4AB0-A1C2-6988A8B7D65D}"
 	ProjectSection(ProjectDependencies) = postProject
 		{917B04F2-90F7-4436-B06B-9702D9746FF8} = {917B04F2-90F7-4436-B06B-9702D9746FF8}
 	EndProjectSection

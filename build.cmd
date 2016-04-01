@@ -11,7 +11,7 @@ IF NOT EXIST %PACKAGEPATH%FAKE (
 )
 
 IF NOT EXIST %PACKAGEPATH%FAKE.BuildLib (
-  %NUGET% install FAKE.BuildLib -Version 0.1.0 %NUGETOPTIONS%
+  %NUGET% install FAKE.BuildLib -Version 0.1.1 %NUGETOPTIONS%
 )
 
 IF NOT EXIST %PACKAGEPATH%xunit.runner.console (
