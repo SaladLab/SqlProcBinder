@@ -1,5 +1,5 @@
-﻿using CodeWriter;
-using System.Linq;
+﻿using System.Linq;
+using CodeWriter;
 
 namespace CodeGenerator
 {

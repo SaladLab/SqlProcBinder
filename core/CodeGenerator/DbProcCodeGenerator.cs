@@ -1,6 +1,6 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using CodeWriter;
-using System;
 
 namespace CodeGenerator
 {

@@ -32,7 +32,7 @@ namespace CodeGenerator.Tests
         {
             if (_command.CommandType == CommandType.StoredProcedure)
             {
-                // Whenever stored-procedure is being executed, 
+                // Whenever stored-procedure is being executed,
                 // create this procedure on test database.
 
                 var dir = AppDomain.CurrentDomain.BaseDirectory;
