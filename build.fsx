@@ -27,7 +27,7 @@ Target "Test" <| fun _ -> testSolution solution
 
 Target "Cover" <| fun _ -> coverSolution solution
     
-Target "Coverity" <| fun _ -> coveritySolution solution "SaladLab/CodeWriter"
+Target "Coverity" <| fun _ -> coveritySolution solution "SaladLab/SqlProcBinder"
 
 Target "Nuget" <| fun _ ->
     createNugetPackages solution
@@ -53,7 +53,7 @@ Target "Help" <| fun _ ->
 "Build" ==> "Nuget"
 "Build" ==> "CreateNuget"
 "Build" ==> "Cover"
-"Build" ==> "Coverity"
+"Restore" ==> "Coverity"
 
 "Test" ==> "CI"
 "Cover" ==> "CI"

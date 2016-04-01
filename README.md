@@ -3,6 +3,7 @@
 [![NuGet Status](http://img.shields.io/nuget/v/SqlProcBinder.svg?style=flat)](https://www.nuget.org/packages/SqlProcBinder/)
 [![Build status](https://ci.appveyor.com/api/projects/status/8k2s8e9h86q4q6vt?svg=true)](https://ci.appveyor.com/project/veblush/sqlprocbinder)
 [![Coverage Status](https://coveralls.io/repos/github/SaladLab/SqlProcBinder/badge.svg?branch=master)](https://coveralls.io/github/SaladLab/SqlProcBinder?branch=master)
+[![Coverity Status](https://scan.coverity.com/projects/8415/badge.svg?flat=1)](https://scan.coverity.com/projects/saladlab-sqlprocbinder)
 
 Calling stored procedure from C# is quite verbose with ADO.NET.
 This library lets you call stored procedure like calling a general C# method.
