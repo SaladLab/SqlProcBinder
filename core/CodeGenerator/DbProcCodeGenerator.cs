@@ -151,11 +151,8 @@ namespace CodeGenerator
             if (w.HeadLines.Contains(line))
                 return;
 
-            var idx = Array.FindLastIndex(w.HeadLines, l => l.StartsWith("using System.Data."));
-
-            var lineList = w.HeadLines.ToList();
-            lineList.Insert(idx + 1, line);
-            w.HeadLines = lineList.ToArray();
+            var idx = w.HeadLines.FindIndex(l => l.StartsWith("using System.Data."));
+            w.HeadLines.Insert(idx + 1, line);
         }
     }
 }
